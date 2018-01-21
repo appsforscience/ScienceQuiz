@@ -9,6 +9,9 @@
 var state_load = {
     label_loading: {},
     preload: function() {
+        game.scale.pageAlignHorizontally = true;
+        game.scale.pageAlignVeritcally = true;
+//        game.scale.startFullScreen(false);
         game.load.image('logo', 'assets/logo.png');
         game.load.image('sky', 'assets/sky.png');
         game.load.audio('yes', 'assets/p-ping.mp3');
@@ -123,10 +126,19 @@ var state_menu = {
     create: function() {
         game.stage.backgroundColor = '#48a';
 
+        if (game.global.done_categories.length ===
+            Object.keys(game.global.questions).length) {
+            game.state.start('final');
+            return;
+        }
+
         var x = game.world.centerX, y = 200;
         add_label(x, 100, 'Elige categoría:');
         for (category in game.global.questions) {
-            add_button(category, x, y, set_category_and_play(category));
+            if (game.global.done_categories.indexOf(category) === -1)
+                add_button(x, y, category, set_category_and_play(category));
+            else
+                add_label(x, y, category);
             y += 100;
         }
     }
@@ -158,10 +170,11 @@ var state_play = {
         var audio_nope = game.add.audio('nope');
 
         var text_score = game.add.text(16, 16, 'Puntos: ' + game.global.score,
-                                       {fontSize: '32px', fill:'#000'});
+                                       {fontSize: '32px', fill:'black'});
 
         question = choose_question();
         if (question == undefined) {
+            game.global.done_categories.push(game.global.current_category);
             game.state.start('menu');
             return;
         }
@@ -179,7 +192,7 @@ var state_play = {
                 audio = audio_yes;
             }
 
-            add_button(question['answers'][j], game.world.centerX, y,
+            add_button(game.world.centerX, y, question['answers'][j],
                        score_and_teach(points, audio,
                                        question['comments'][j], question['image']));
             y += 100;
@@ -201,7 +214,8 @@ function score_and_teach(points, audio, txt, image) {
         graphics.events.onInputDown.add(() => game.state.start('play'));
 
         if (image) {
-            var sprite = game.add.sprite(game.world.centerX, game.world.centerY, image);
+            var sprite = game.add.sprite(game.world.centerX, game.world.centerY,
+                                         image);
             sprite.anchor.setTo(0.5, 0.5);
             xstretch = sprite.width / game.world.width;
             ystretch = sprite.height / game.world.height;
@@ -216,13 +230,14 @@ function score_and_teach(points, audio, txt, image) {
         }
 
         var text = game.add.text(game.world.centerX, game.world.centerY, txt,
-                                 {fontSize: '32px', fill:'#fff'});
+                                 {fontSize: '32px', fill:'white'});
         text.setShadow(0, 0, 'rgba(0, 0, 0, 1)', 10);
         text.wordWrap = true;
         text.wordWrapWidth = 500;
         text.anchor.setTo(0.5, 0.5);  // text centered at the given x, y
 
-        add_label(game.world.centerX, 550, '(Toca en cualquier sitio para continuar)');
+        add_label(game.world.centerX, 550,
+                  '(Toca en cualquier sitio para continuar)');
     };
 }
 
@@ -233,6 +248,30 @@ function choose_question() {
     var selected = game.global.selected_questions;
     return questions[selected[game.global.current_question++]];
 }
+
+
+//  ************************************************************************
+//  *                                                                      *
+//  *                                Final                                 *
+//  *                                                                      *
+//  ************************************************************************
+
+var state_final = {
+    create: function() {
+        game.stage.backgroundColor = '#48a';
+
+        var [x, y] = [game.world.centerX, game.world.centerY];
+        add_label(x, y, 'Tu puntuación final es\n' + game.global.score);
+
+        var brag = 'He completado ScienceQuiz y conseguido ' +
+            game.global.score + ' puntos!'.replace(/ /g, '%20');
+        var tweet = 'https://twitter.com/intent/tweet?text=' + brag;
+        add_button(x, y + 100, 'Compartir en twitter',
+                   () => window.open(tweet, '_blank'));
+        add_button(x, y + 200, 'Volver a jugar',
+                   () => { global_reset(); game.state.start('menu'); });
+    }
+};
 
 
 //  ************************************************************************
@@ -257,7 +296,7 @@ function shuffle(n) {
 // Add label at position x, y.
 function add_label(x, y, txt) {
     var text = game.add.text(x, y, txt,
-                             {font: '25px Arial', fill: '#000',
+                             {font: '25px Arial', fill: 'black',
                               wordWrap: true, wordWrapWidth: 500, align: "center"});
     text.anchor.setTo(0.5, 0.5);  // text centered at the given x, y
     return text;
@@ -266,12 +305,12 @@ function add_label(x, y, txt) {
 
 // Add button with text on it, at the given x, y position and calling
 // a callback when clicked.
-function add_button(txt, x, y, on_click) {
+function add_button(x, y, txt, on_click) {
     var button = game.add.button(x, y, 'button', on_click, this, 0, 1, 2);
     button.anchor.setTo(0.5, 0.5);  // button centered at the given x, y
 
     var text = game.add.text(x, y, txt,
-                             {font: '25px Arial', fill: '#000',
+                             {font: '25px Arial', fill: 'black',
                               wordWrap: true, wordWrapWidth: 500, align: "center"});
     text.anchor.setTo(0.5, 0.5);  // text centered at the given x, y
     button.width = Math.max(200, text.width + 40);
