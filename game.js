@@ -1,6 +1,6 @@
 // Prototype for ScienceQuiz, the quiz game!
 
-var game = new Phaser.Game(720, 1280, Phaser.AUTO, 'game');
+var game = new Phaser.Game(800, 800, Phaser.AUTO, 'game');  // use 720x1280?
 
 game.global = {
     score: 0,

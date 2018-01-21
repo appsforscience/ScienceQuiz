@@ -1,6 +1,6 @@
 Las primeras tres líneas son ignoradas por el scipt que lee los contenidos. Asi que aquí se pueden poner cualquier tipo de comentarios.							
+Cada día cada uno vamos a hacer al menos dos preguntas completas.							
 Pregunta	Respuesta correcta	Respuesta 2	Respuesta 3	Comentario 1	Comentario 2	Comentario 3	Imagen
-							
 Historia de la ciencia							
 ¿Quién fue la primera mujer en el espacio?	Valentina Tereshkova	Sally Ride	Vera Rubin	¡Valentina hizo historia con solo 23 años! Orbitó la Tierra durante 3 días.			valentina.jpg
 ¿Cuántas mujeres astronautas ha habido?	Más de 60	Entre 20 y 60	Menos de 20	¡Y cada vez el número crece más rápido!			astronautas.jpg
@@ -9,19 +9,41 @@ Historia de la ciencia
 ¿Quién fue la primera mujer que descubrió un cometa?	Maria Kirch	Caroline Herschel	Maria Mitchell	Durante años se pensó que había sido Caroline Herschel, porque el cometa de Kirch se atribuyó a su marido.			maria.jpg
 ¿Quién de estas mujeres trabajó como computadora?	Maria Mitchell	Vera Rubin	Sally Ride	Hizo cálculos relacionados con las efemérides astronómicas.	Vera también fue una astrónoma, pero la que además trabajó como "computadora" fue Maria Mitchell.	Sally Ride fue la primera astronauta estadounidense. Maria Mitchell fue la que trabajó como "computadora".	
 La programadora responsable del desarrollo del software del Apolo fue...	Margaret Hamilton	Ada Lovelace	Grace Hopper				hamilton.jpg
-La primera astronauta negra fue...	Mae Jameson						
-La responsable del equipo de imágenes de la misión Cassini fue...	Carolyn Porco						
-¿Cuál de estas mujeres no es primatóloga?	Nancy Roman	Jane Goddall	Dian Fossey				
+La primera astronauta negra fue...	Mae Jameson	Jerrie Cobb	Sally Ride				
+La responsable del equipo de imágenes de la misión Cassini fue...	Carolyn Porco	Nancy Roman	Grace Hopper				
+¿Cuál de estas mujeres no es primatóloga?	Nancy Roman	Jane Goddall	Dian Fossey				nancy_roman.jpg
+¿Quién de estas mujeres fue la primera en pasar las mismas pruebas de selección que los astronautas estadounidenses?	Jerrie Cobb	Wally Funk	Sally Ride	Jerrie Cobb fue la primera de las "Mercury 13", un grupo de mujeres que fueron seleccionadas por una fundación provada para pasar las pruebas de astronautas. 	Wally Funk era la más joven de las las "Mercury 13". Jerrie Cobb fue la que pasó las mismas pruebas que los astronautas de la NASA.	Sally Ride fue la primera estadounidense en el espacio, pero Jerrie Cobb fue la primera mujer que superó las mismas pruebas de selección que los astronautas hombres de la NASA.	jerrie_cobb.jpg
+¿Quién fue la primera persona LGBTQ+ en el espacio?	Sally Ride	Vera Rubin	Maria Mitchell				sally_ride.jpg
+							
 Astronomía							
 El sol es una estrella de clase...	G	B	O				
 Las estrellas están compuestas mayoritariamente de...	Hidrógeno y Helio	Carbono y oxígeno	Hidrógeno y Carbono				
 Las estrellas de las afueras de nuestra galaxia...	Giran más rápido de lo esperado	Giran más lento de lo esperado	No giran				
 ¿Qué es el diagrama de Hertzsprung-Russell?	Una clasificación del brillo y temperatura de las estrellas	Una muestra de los estados de la materia	Una visualización de las trayectorias de partículas fundamentales				hr.jpg
-							
-							
+La primera enana marrón descubierta tiene una masa de ....	55 veces la masa de Júpiter	5 veces la masa de Júpiter	555 veces la masa de Júpiter	Teide 1 se descubrió desde el Instituto Atrofísico de Canarias por Maria Rosa Zapatero, Rafael Rebolo y Eduardo Martín. Está en el cúmulo de las Pléyades. 	Más: 55 veces la masa de Júpiter. Teide 1 se descubrió desde el Instituto Atrofísico de Canarias por Maria Rosa Zapatero, Rafael Rebolo y Eduardo Martín. Está en el cúmulo de las Pléyades. 	Mucho menos: 55 veces la masa de Júpiter. Teide 1 se descubrió desde el Instituto Atrofísico de Canarias por Maria Rosa Zapatero, Rafael Rebolo y Eduardo Martín. Está en el cúmulo de las Pléyades. 	brown_dwarf.jpg
+¿Cuántas lunas tiene Saturno?	62	32	12	Siete de las 62 lunas de Saturno fueron descubiertas por la misión Cassini. La investigadora responsable del equipo de imágenes es Carolyn Porco. 	Siete de las 62 lunas de Saturno fueron descubiertas por la misión Cassini. La investigadora responsable del equipo de imágenes es Carolyn Porco. 	Siete de las 62 lunas de Saturno fueron descubiertas por la misión Cassini. La investigadora responsable del equipo de imágenes es Carolyn Porco.	saturn.jpg
 Las estrellas son como gigantescos hornos donde se produce...	Fusión nuclear	Fisión nuclear	Fisión y fusión nuclear				
 La primera evidencia de actividad volcánica fuera de nuestro planeta se descubrió en...	Ío, luna de Júpiter	Encélado, luna de Júpiter	Deimos, luna de Marte				
+¿En cuál de estas lunas hemos visto lagos de hidrocarburos?	Titán, luna de Saturno	Deimos, luna de Marte	Ío, luna de Júpiter	Los lagos fueron descubiertos en los polos por la misión Cassini. La investigadora responsable del equipo de imágenes es Carolyn Porco.	No, fue en Titán. Los lagos fueron descubiertos en los polos por la misión Cassini. La investigadora responsable del equipo de imágenes es Carolyn Porco.	No, fue en Titán. Los lagos fueron descubiertos en los polos por la misión Cassini. La investigadora responsable del equipo de imágenes es Carolyn Porco.	titan.jpg
 							
 							
-Biología							
+							
+Ciencias Naturales							
 ¿Qué es el DNA?	Una molécula que codifica los genes en seres vivos	Una especie de caballo	El aparato encargado de la respiración celular				dna.jpg
+							
+							
+							
+Matemáticas							
+¿Cuál es la primera matemática conocida?	Hypatia	Agnes	Noether				
+							
+							
+							
+							
+Física							
+La violación de la simetría de paridad fue descubierta por...	Wu	Wa	Wo				
+							
+							
+							
+							
+Informática							
+¿Cuándo se hizo el primer programa de ordenador?	1842	1900	1920	Es la fecha en que Ada Lovelace publicó un algorimo para computar los números de Bernoulli.			
