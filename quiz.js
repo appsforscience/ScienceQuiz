@@ -13,6 +13,7 @@ var state_load = {
         game.load.image('sky', 'assets/sky.png');
         game.load.audio('yes', 'assets/p-ping.mp3');
         game.load.audio('nope', 'assets/meow2.mp3');
+        game.load.audio('blaster', 'assets/blaster.mp3');
         game.load.spritesheet('button', 'assets/button.png', 80, 20);
 
         read_file('contents.tsv', load_contents);
@@ -137,7 +138,7 @@ function set_category_and_play(category) {
         game.global.current_category = category;
         game.global.selected_questions = shuffle(game.global.questions[category].length);
         game.global.current_question = 0;
-        game.add.audio('yes').play();
+        game.add.audio('blaster').play();
         game.state.start('play');
     };
 }
