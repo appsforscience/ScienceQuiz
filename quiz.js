@@ -214,9 +214,8 @@ function score_and_teach(points, audio, txt, image) {
         graphics.events.onInputDown.add(() => game.state.start('play'));
 
         if (image) {
-            var sprite = game.add.sprite(game.world.centerX, game.world.centerY,
-                                         image);
-            sprite.anchor.setTo(0.5, 0.5);
+            var sprite = game.add.sprite(game.world.centerX, 0, image);
+            sprite.anchor.setTo(0.5, 0);
             xstretch = sprite.width / game.world.width;
             ystretch = sprite.height / game.world.height;
             if (xstretch > ystretch) {
