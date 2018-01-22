@@ -1,8 +1,5 @@
 // The different scenes ("states") of the game.
 
-// TODO:
-//  * Fonts with pixi.
-
 //  ************************************************************************
 //  *                                                                      *
 //  *                                Load.                                 *
@@ -14,11 +11,14 @@ var state_load = {
     preload: function() {
         game.load.image('logo', 'assets/logo.png');
         game.load.image('sky', 'assets/sky.png');
+        game.load.image('math', 'assets/math.jpg');
+        game.load.image('biology', 'assets/biology.jpg');
+        game.load.image('astronomy', 'assets/astronomy.jpg');
         game.load.audio('yes', 'assets/p-ping.mp3');
         game.load.audio('nope', 'assets/meow2.mp3');
         game.load.audio('blaster', 'assets/blaster.mp3');
         game.load.spritesheet('button', 'assets/button.png', 80, 20);
-
+        game.load.bitmapFont('desyrel', 'assets/desyrel.png', 'assets/desyrel.xml');
         read_file('contents.tsv', load_contents);
     },
     create: function() {
@@ -127,7 +127,7 @@ function has_new_category(fields) {
 
 var state_menu = {
     create: function() {
-        game.stage.backgroundColor = '#48a';
+        game.stage.backgroundColor = '#666';
 
         if (game.global.done_categories.length ===
             Object.keys(game.global.questions).length) {
@@ -135,8 +135,11 @@ var state_menu = {
             return;
         }
 
-        var x = game.world.centerX, y = 200;
-        add_label(x, 100, 'Elige categoría:');
+        var [x, y] = [game.world.centerX, 200];
+
+        var text = game.add.bitmapText(x, 50, 'desyrel', 'Puedes elegir...', 64);
+        text.anchor.setTo(0.5, 0.5);
+
         for (category in game.global.questions) {
             if (game.global.done_categories.indexOf(category) === -1)
                 add_button(x, y, category, set_category_and_play(category));
@@ -167,13 +170,32 @@ function set_category_and_play(category) {
 
 var state_play = {
     create: function() {
-        game.add.sprite(0, 0, 'sky');
+        game.stage.backgroundColor = '#fff';
+        var [xc, yc] = [game.world.centerX, game.world.centerY];
+        var bg_img = '';
+        if (['Matemáticas', 'Física', 'Informática'].indexOf(game.global.current_category) >= 0)
+            bg_img = 'math';
+        else if (['Astronomía', 'Historia de la ciencia'].indexOf(game.global.current_category) >= 0)
+            bg_img = 'astronomy';
+        else
+            bg_img = 'biology';
+        var bg = game.add.sprite(xc / 2 + rand(xc), yc / 2 + rand(yc), bg_img);
+        maximize(bg);
+        bg.alpha = 0.2;
+        bg.anchor.setTo(0.5, 0.5);
+        function move_bg() {
+            var bg_tween = game.add.tween(bg).to({x: xc / 2 + rand(xc),
+                                                  y: yc / 2 + rand(yc)},
+                                                 10000, null, true, 500);
+            bg_tween.onComplete.addOnce(move_bg);
+        }
+        move_bg();
 
         var audio_yes = game.add.audio('yes');
         var audio_nope = game.add.audio('nope');
 
-        var text_score = game.add.text(16, 16, 'Puntos: ' + game.global.score,
-                                       {fontSize: '32px', fill:'black'});
+        var text_score = game.add.bitmapText(5, 5, 'desyrel',
+                                             'Puntos: ' + game.global.score, 50);
 
         question = choose_question();
         if (question == undefined) {
@@ -182,8 +204,8 @@ var state_play = {
             return;
         }
 
-        add_label(game.world.centerX, 100, question['question']);
-        var y = 200;
+        add_label(game.world.centerX, 120, question['question']);
+        var y = 250;
         reorder = shuffle(question['answers'].length);
         for (i = 0; i < question['answers'].length; i++) {
             var j = reorder[i];
@@ -195,10 +217,11 @@ var state_play = {
                 audio = audio_yes;
             }
 
-            add_button(game.world.centerX, y, question['answers'][j],
-                       score_and_teach(points, audio,
-                                       question['comments'][j], question['image']));
-            y += 100;
+            var button = add_button(game.world.centerX, y, question['answers'][j],
+                                    score_and_teach(points, audio,
+                                                    question['comments'][j],
+                                                    question['image']));
+            y += button.height + 50;
         }
     }
 };
@@ -219,16 +242,7 @@ function score_and_teach(points, audio, txt, image) {
         if (image) {
             var sprite = game.add.sprite(game.world.centerX, 0, image);
             sprite.anchor.setTo(0.5, 0);
-            xstretch = sprite.width / game.world.width;
-            ystretch = sprite.height / game.world.height;
-            if (xstretch > ystretch) {
-                sprite.width = game.world.width;
-                sprite.height /= xstretch;
-            }
-            else {
-                sprite.width /= ystretch;
-                sprite.height = game.world.height;
-            }
+            maximize(sprite);
         }
 
         var text = game.add.text(game.world.centerX, game.world.centerY, txt,
@@ -237,9 +251,6 @@ function score_and_teach(points, audio, txt, image) {
         text.wordWrap = true;
         text.wordWrapWidth = 500;
         text.anchor.setTo(0.5, 0.5);  // text centered at the given x, y
-
-        add_label(game.world.centerX, 550,
-                  '(Toca en cualquier sitio para continuar)');
     };
 }
 
@@ -263,7 +274,10 @@ var state_final = {
         game.stage.backgroundColor = '#48a';
 
         var [x, y] = [game.world.centerX, game.world.centerY];
-        add_label(x, y, 'Tu puntuación final es\n' + game.global.score);
+        var text_score = game.add.bitmapText(x, y - 100, 'desyrel',
+                                             'Total de puntos:\n' + game.global.score, 80);
+        text_score.align = 'center';
+        text_score.anchor.setTo(0.5, 0.5);
 
         var brag = 'He completado ScienceQuiz y conseguido ' +
             game.global.score + ' puntos!'.replace(/ /g, '%20');
@@ -285,8 +299,8 @@ var state_final = {
 // Add label at position x, y.
 function add_label(x, y, txt) {
     var text = game.add.text(x, y, txt,
-                             {font: '25px Arial', fill: 'black',
-                              wordWrap: true, wordWrapWidth: 500, align: "center"});
+                             {font: '25px Times', fill: 'black',
+                              wordWrap: true, wordWrapWidth: 500, align: 'center'});
     text.anchor.setTo(0.5, 0.5);  // text centered at the given x, y
     return text;
 }
@@ -297,16 +311,12 @@ function add_label(x, y, txt) {
 function add_button(x, y, txt, on_click) {
     var group_button = game.add.group();
 
-    var button = game.add.button(0, 0,
-                                 'button', on_click, this, 0, 1, 2);
+    var button = game.add.button(0, 0, 'button', on_click, this, 0, 1, 2);
     button.anchor.setTo(0.5, 0.5);  // button centered at the given x, y
     group_button.add(button);
 
-    var text = game.add.text(0, 0, txt,
-                             {font: '25px Arial', fill: 'black',
-                              wordWrap: true, wordWrapWidth: 500, align: "center"});
-    text.anchor.setTo(0.5, 0.5);  // text centered at the given x, y
-    button.width = Math.max(200, text.width + 40);
+    var text = add_label(0, 0, txt);
+    button.width = Math.max(400, text.width + 40);
     button.height = text.height + 30;
     group_button.add(text);
 
@@ -314,7 +324,15 @@ function add_button(x, y, txt, on_click) {
     group_button.y = rand(2) * 2 * y,
     game.add.tween(group_button).to({x: x, y: y}, rand(500), null, true, rand(200), 0);
 
-    return button;
+    return group_button;
+}
+
+
+function maximize(sprite) {
+    var scale = Math.min(game.world.width / sprite.width,
+                         game.world.height / sprite.height);
+    sprite.width *= scale;
+    sprite.height *= scale;
 }
 
 
