@@ -10,7 +10,6 @@ var state_load = {
     label_loading: {},
     preload: function() {
         game.load.image('logo', 'assets/logo.png');
-        game.load.image('sky', 'assets/sky.png');
         game.load.image('math', 'assets/math.jpg');
         game.load.image('biology', 'assets/biology.jpg');
         game.load.image('astronomy', 'assets/astronomy.jpg');
