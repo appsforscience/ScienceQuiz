@@ -17,11 +17,11 @@ copia local de::
 Ejecutar
 --------
 
-Una forma rápida es tener abierto un servidor local, por ejemplo con::
+Una forma rápida es tener abierto un servidor local
+(http://localhost:8000), por ejemplo ejecutando desde este
+directorio::
 
-  python -m SimpleHTTPServer 8000
-
-desde este directorio.
+  python3 -m http.server
 
 
 Ejemplos
