@@ -312,14 +312,10 @@ var state_final = {
 // Add sound on/of button.
 function add_sound_button() {
     var sprite = game.add.sprite(game.width - 60, game.height - 60,
-                                 'speaker_on');
+                                 game.sound.noAudio ? 'speaker_off' : 'speaker_on');
     function switch_audio() {
         game.sound.noAudio = !game.sound.noAudio;
-
-        if (sprite.key === 'speaker_on')
-            sprite.loadTexture('speaker_off');
-        else
-            sprite.loadTexture('speaker_on');
+        sprite.loadTexture(game.sound.noAudio ? 'speaker_off' : 'speaker_on');
     }
 
     sprite.inputEnabled = true;
