@@ -1,5 +1,9 @@
 // The different scenes ("states") of the game.
 
+// TODO:
+//  * Ask the name of the user (and use it to congratulate her at the end).
+//  * Check the time used to answer each question.
+
 //  ************************************************************************
 //  *                                                                      *
 //  *                                Load.                                 *
