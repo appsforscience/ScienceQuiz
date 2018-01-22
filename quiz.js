@@ -10,6 +10,8 @@ var state_load = {
     label_loading: {},
     preload: function() {
         game.load.image('logo', 'assets/logo.png');
+        game.load.image('speaker_on', 'assets/speaker_on.png');
+        game.load.image('speaker_off', 'assets/speaker_off.png');
         game.load.image('math', 'assets/math.jpg');
         game.load.image('biology', 'assets/biology.jpg');
         game.load.image('astronomy', 'assets/astronomy.jpg');
@@ -147,16 +149,24 @@ var state_menu = {
                 add_label(x, y, category);
             y += 100;
         }
+
+        add_sound_button();
     }
 };
 
 
-function set_category_and_play(category) {
+function set_category_and_play(category, n_questions) {
     return () => {
         game.global.current_category = category;
-        game.global.selected_questions = shuffle(game.global.questions[category].length);
+        var n = 0;
+        if (n_questions === undefined)
+            n = game.global.questions[category].length;
+        else
+            n = n_questions;
+        game.global.selected_questions = shuffle(n)
         game.global.current_question = 0;
-        game.add.audio('menu').play();
+        if (!game.sound.noAudio)
+            game.add.audio('menu', 0.01).play();
         game.state.start('play');
     };
 }
@@ -191,8 +201,8 @@ var state_play = {
         }
         move_bg();
 
-        var audio_yes = game.add.audio('yes');
-        var audio_nope = game.add.audio('nope');
+        var audio_yes = game.add.audio('yes', 0.05);
+        var audio_nope = game.add.audio('nope', 0.05);
 
         var text_score = game.add.bitmapText(5, 5, 'desyrel',
                                              'Puntos: ' + game.global.score, 50);
@@ -223,6 +233,8 @@ var state_play = {
                                                     question['image']));
             y += button.height + 50;
         }
+
+        add_sound_button();
     }
 };
 
@@ -230,7 +242,8 @@ var state_play = {
 // Increase the global score and show a text and image.
 function score_and_teach(points, audio, txt, image) {
     return () => {
-        audio.play();
+        if (!game.sound.noAudio)
+            audio.play();
         game.global.score += points;
 
         var graphics = game.add.graphics();
@@ -296,6 +309,24 @@ var state_final = {
 //  *                                                                      *
 //  ************************************************************************
 
+// Add sound on/of button.
+function add_sound_button() {
+    var sprite = game.add.sprite(game.width - 60, game.height - 60,
+                                 'speaker_on');
+    function switch_audio() {
+        game.sound.noAudio = !game.sound.noAudio;
+
+        if (sprite.key === 'speaker_on')
+            sprite.loadTexture('speaker_off');
+        else
+            sprite.loadTexture('speaker_on');
+    }
+
+    sprite.inputEnabled = true;
+    sprite.events.onInputDown.add(switch_audio);
+}
+
+
 // Add label at position x, y.
 function add_label(x, y, txt) {
     var text = game.add.text(x, y, txt,
@@ -328,6 +359,7 @@ function add_button(x, y, txt, on_click) {
 }
 
 
+// Make the sprite use as much space as possible on the screen.
 function maximize(sprite) {
     var scale = Math.min(game.world.width / sprite.width,
                          game.world.height / sprite.height);
