@@ -15,6 +15,12 @@ var state_load = {
         game.load.image('math', 'assets/math.jpg');
         game.load.image('biology', 'assets/biology.jpg');
         game.load.image('astronomy', 'assets/astronomy.jpg');
+        game.load.image('Premio_Astronomia', 'assets/Premio_Astronomia.png');
+        game.load.image('Premio_Fisica', 'assets/Premio_Fisica.png');
+        game.load.image('Premio_Historia', 'assets/Premio_Historia.png');
+        game.load.image('Premio_Informatica', 'assets/Premio_Informatica.png');
+        game.load.image('Premio_Mates', 'assets/Premio_Mates.png');
+        game.load.image('Premio_Naturales', 'assets/Premio_Naturales.png');
         game.load.audio('yes', 'assets/p-ping.mp3');
         game.load.audio('nope', 'assets/explosion.mp3');
         game.load.audio('blaster', 'assets/blaster.mp3');
@@ -146,7 +152,7 @@ var state_menu = {
             if (game.global.done_categories.indexOf(category) === -1)
                 add_button(x, y, category, set_category_and_play(category));
             else
-                add_label(x, y, category);
+                add_prize(x, y, category);
             y += 100;
         }
 
@@ -349,9 +355,29 @@ function add_button(x, y, txt, on_click) {
 
     group_button.x = rand(2) * 2 * x;
     group_button.y = rand(2) * 2 * y,
-    game.add.tween(group_button).to({x: x, y: y}, rand(500), null, true, rand(200), 0);
+    game.add.tween(group_button).to({x: x, y: y}, rand(500), null,
+                                    true, rand(200), 0);
 
     return group_button;
+}
+
+
+// Add an image with the prize that corresponds to a category and its name.
+function add_prize(x, y, category) {
+    var image = {
+        'Astronomía': 'Premio_Astronomia',
+        'Física': 'Premio_Fisica',
+        'Historia de la ciencia': 'Premio_Historia',
+        'Informática': 'Premio_Informatica',
+        'Matemáticas': 'Premio_Mates',
+        'Ciencias Naturales': 'Premio_Naturales'}[category];
+    if (category) {
+        var medal = game.add.sprite(x, y, image);
+        medal.anchor.setTo(0.5, 0.5);
+        medal.scale.setTo(0.2, 0.2);
+    }
+
+    add_label(x, y, category);
 }
 
 
