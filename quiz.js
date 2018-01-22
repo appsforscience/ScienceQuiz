@@ -1,5 +1,8 @@
 // The different scenes ("states") of the game.
 
+// TODO:
+//  * Fonts with pixi.
+
 //  ************************************************************************
 //  *                                                                      *
 //  *                                Load.                                 *
@@ -9,9 +12,6 @@
 var state_load = {
     label_loading: {},
     preload: function() {
-        game.scale.pageAlignHorizontally = true;
-        game.scale.pageAlignVeritcally = true;
-//        game.scale.startFullScreen(false);
         game.load.image('logo', 'assets/logo.png');
         game.load.image('sky', 'assets/sky.png');
         game.load.audio('yes', 'assets/p-ping.mp3');
@@ -22,6 +22,9 @@ var state_load = {
         read_file('contents.tsv', load_contents);
     },
     create: function() {
+        game.scale.pageAlignHorizontally = true;
+        game.scale.pageAlignVeritcally = true;
+
         flash_image('logo', 1000);
         game.time.events.add(2000, () => game.state.start('menu'));
     },
@@ -279,19 +282,6 @@ var state_final = {
 //  *                                                                      *
 //  ************************************************************************
 
-// Return range(n) randomly shuffled.
-function shuffle(n) {
-    var reorder = new Array(n).fill().map((e, i) => i);  // reoder = range(n)
-    for (i = 0; i < n; i++) {
-        var j = Math.floor(Math.random() * n);
-        tmp = reorder[i];
-        reorder[i] = reorder[j];
-        reorder[j] = tmp;
-    }
-    return reorder;
-}
-
-
 // Add label at position x, y.
 function add_label(x, y, txt) {
     var text = game.add.text(x, y, txt,
@@ -305,15 +295,43 @@ function add_label(x, y, txt) {
 // Add button with text on it, at the given x, y position and calling
 // a callback when clicked.
 function add_button(x, y, txt, on_click) {
-    var button = game.add.button(x, y, 'button', on_click, this, 0, 1, 2);
-    button.anchor.setTo(0.5, 0.5);  // button centered at the given x, y
+    var group_button = game.add.group();
 
-    var text = game.add.text(x, y, txt,
+    var button = game.add.button(0, 0,
+                                 'button', on_click, this, 0, 1, 2);
+    button.anchor.setTo(0.5, 0.5);  // button centered at the given x, y
+    group_button.add(button);
+
+    var text = game.add.text(0, 0, txt,
                              {font: '25px Arial', fill: 'black',
                               wordWrap: true, wordWrapWidth: 500, align: "center"});
     text.anchor.setTo(0.5, 0.5);  // text centered at the given x, y
     button.width = Math.max(200, text.width + 40);
     button.height = text.height + 30;
+    group_button.add(text);
+
+    group_button.x = rand(2) * 2 * x;
+    group_button.y = rand(2) * 2 * y,
+    game.add.tween(group_button).to({x: x, y: y}, rand(500), null, true, rand(200), 0);
 
     return button;
+}
+
+
+// Return range(n) randomly shuffled.
+function shuffle(n) {
+    var reorder = new Array(n).fill().map((e, i) => i);  // reoder = range(n)
+    for (i = 0; i < n; i++) {
+        var j = rand(n);
+        tmp = reorder[i];
+        reorder[i] = reorder[j];
+        reorder[j] = tmp;
+    }
+    return reorder;
+}
+
+
+// Return a random number between 0 and n-1.
+function rand(n) {
+    return Math.floor(Math.random() * n);
 }
