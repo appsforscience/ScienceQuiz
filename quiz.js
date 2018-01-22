@@ -15,8 +15,9 @@ var state_load = {
         game.load.image('biology', 'assets/biology.jpg');
         game.load.image('astronomy', 'assets/astronomy.jpg');
         game.load.audio('yes', 'assets/p-ping.mp3');
-        game.load.audio('nope', 'assets/meow2.mp3');
+        game.load.audio('nope', 'assets/explosion.mp3');
         game.load.audio('blaster', 'assets/blaster.mp3');
+        game.load.audio('menu', 'assets/menu_select.mp3');
         game.load.spritesheet('button', 'assets/button.png', 80, 20);
         game.load.bitmapFont('desyrel', 'assets/desyrel.png', 'assets/desyrel.xml');
         read_file('contents.tsv', load_contents);
@@ -156,7 +157,7 @@ function set_category_and_play(category) {
         game.global.current_category = category;
         game.global.selected_questions = shuffle(game.global.questions[category].length);
         game.global.current_question = 0;
-        game.add.audio('blaster').play();
+        game.add.audio('menu').play();
         game.state.start('play');
     };
 }
