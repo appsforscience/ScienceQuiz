@@ -47,4 +47,4 @@ https://docs.google.com/spreadsheets/d/13fWnAzvhiCUsWbc_UEmR2k2NIl6-9XUq_8S_ovVu
 
 Las imágenes grandes se pueden convertir a un tamaño razonable con::
 
-  convert -resize img_big.jpg img.jpg
+  convert -resize 400 img_big.jpg img.jpg
