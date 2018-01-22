@@ -190,27 +190,7 @@ function set_category_and_play(category, n_questions) {
 
 var state_play = {
     create: function() {
-        game.stage.backgroundColor = '#fff';
-        var [xc, yc] = [game.world.centerX, game.world.centerY];
-        var bg_img = '';
-        if (['Matemáticas', 'Física', 'Informática'].indexOf(game.global.current_category) >= 0)
-            bg_img = 'math';
-        else if (['Astronomía', 'Historia de la ciencia'].indexOf(game.global.current_category) >= 0)
-            bg_img = 'astronomy';
-        else
-            bg_img = 'biology';
-        var bg = game.add.sprite(xc / 2 + rand(xc), yc / 2 + rand(yc), bg_img);
-        maximize(bg);
-        bg.alpha = 0.2;
-        bg.anchor.setTo(0.5, 0.5);
-        function move_bg() {
-            var bg_tween = game.add.tween(bg).to({x: xc / 2 + rand(xc),
-                                                  y: yc / 2 + rand(yc)},
-                                                 10000, null, true, 500);
-            bg_tween.onComplete.addOnce(move_bg);
-        }
-        move_bg();
-
+        add_background();
         var audio_yes = game.add.audio('yes', 0.05);
         var audio_nope = game.add.audio('nope', 0.05);
 
@@ -249,6 +229,31 @@ var state_play = {
 };
 
 
+function add_background() {
+    game.stage.backgroundColor = '#fff';
+    var [xc, yc] = [game.world.centerX, game.world.centerY];
+    // Quick hack, before we have all the backgrounds.
+    var bg_img = '';
+    if (['Matemáticas', 'Física', 'Informática'].indexOf(game.global.current_category) >= 0)
+        bg_img = 'math';
+    else if (['Astronomía', 'Historia de la ciencia'].indexOf(game.global.current_category) >= 0)
+        bg_img = 'astronomy';
+    else
+        bg_img = 'biology';
+    var bg = game.add.sprite(xc / 2 + rand(xc), yc / 2 + rand(yc), bg_img);
+    maximize(bg);
+    bg.alpha = 0.2;
+    bg.anchor.setTo(0.5, 0.5);
+    function move_bg() {
+        var bg_tween = game.add.tween(bg).to({x: xc / 2 + rand(xc),
+                                              y: yc / 2 + rand(yc)},
+                                             10000, null, true, 500);
+        bg_tween.onComplete.addOnce(move_bg);
+    }
+    move_bg();
+}
+
+
 // Increase the global score and show a text and image.
 function score_and_teach(points, audio, txt, image) {
     return () => {
@@ -261,6 +266,8 @@ function score_and_teach(points, audio, txt, image) {
         graphics.drawRect(0, 0, game.world.width, game.world.height);
         graphics.inputEnabled = true;
         graphics.events.onInputDown.add(() => game.state.start('play'));
+
+        add_background();
 
         if (image) {
             var sprite = game.add.sprite(game.world.centerX, 0, image);
