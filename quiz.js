@@ -34,11 +34,13 @@ var state_load = {
         read_file('contents.tsv', load_contents);
     },
     create: function() {
+        game.add.plugin(PhaserInput.Plugin);
+
         game.scale.pageAlignHorizontally = true;
         game.scale.pageAlignVeritcally = true;
 
         flash_image('logo', 1000);
-        game.time.events.add(2000, () => game.state.start('menu'));
+        game.time.events.add(2000, () => game.state.start('intro'));
     },
 };
 
@@ -133,6 +135,38 @@ function has_new_category(fields) {
 
 //  ************************************************************************
 //  *                                                                      *
+//  *                                Intro                                 *
+//  *                                                                      *
+//  ************************************************************************
+
+var state_intro = {
+    create: function() {
+        game.stage.backgroundColor = '#666';
+        var [x, y] = [game.world.centerX, game.world.centerY];
+        var label = add_label(x, y,
+                              'Hola, ¡bonito peinado!\n¿Cómo te llamas?');
+        var input = game.add.inputField(x - 75, y + label.height, {
+            font: '18px Arial',
+            fill: '#212121',
+            fontWeight: 'bold',
+            width: 150,
+            padding: 8,
+            borderWidth: 1,
+            borderColor: '#000',
+            borderRadius: 6,
+            textAlign: 'center'});
+        //input.setText('Anónimo');  // could be
+        input.startFocus();
+        add_button(x, input.y + input.height + 100,
+                   'Pulsa cuando quieras', () => {
+                       game.global.name = input.text.text || 'persona anonima';
+                       game.state.start('menu');});
+    }
+};
+
+
+//  ************************************************************************
+//  *                                                                      *
 //  *                                 Menu                                 *
 //  *                                                                      *
 //  ************************************************************************
@@ -159,7 +193,6 @@ var state_menu = {
                 add_prize(x, y, category);
             y += 100;
         }
-
         add_sound_button();
     }
 };
@@ -176,7 +209,7 @@ function set_category_and_play(category, n_questions) {
         game.global.selected_questions = shuffle(n)
         game.global.current_question = 0;
         if (!game.sound.noAudio)
-            game.add.audio('menu', 0.01).play();
+            game.add.audio('menu', 0.05).play();
         game.state.start('play');
     };
 }
@@ -191,8 +224,8 @@ function set_category_and_play(category, n_questions) {
 var state_play = {
     create: function() {
         add_background();
-        var audio_yes = game.add.audio('yes', 0.05);
-        var audio_nope = game.add.audio('nope', 0.05);
+        var audio_yes = game.add.audio('yes', 0.1);
+        var audio_nope = game.add.audio('nope', 0.1);
 
         var text_score = game.add.bitmapText(5, 5, 'desyrel',
                                              'Puntos: ' + game.global.score, 50);
@@ -281,6 +314,8 @@ function score_and_teach(points, audio, txt, image) {
         text.wordWrap = true;
         text.wordWrapWidth = 500;
         text.anchor.setTo(0.5, 0.5);  // text centered at the given x, y
+
+        score_feedback(points);
     };
 }
 
@@ -304,6 +339,10 @@ var state_final = {
         game.stage.backgroundColor = '#48a';
 
         var [x, y] = [game.world.centerX, game.world.centerY];
+        var text_congrats = game.add.bitmapText(x, 100, 'desyrel',
+                                                'Enhorabuena\n' + game.global.name + '!!!', 80);
+        text_congrats.align = 'center';
+        text_congrats.anchor.setTo(0.5, 0.5);
         var text_score = game.add.bitmapText(x, y - 100, 'desyrel',
                                              'Total de puntos:\n' + game.global.score, 80);
         text_score.align = 'center';
@@ -370,6 +409,18 @@ function add_button(x, y, txt, on_click) {
                                     true, rand(200), 0);
 
     return group_button;
+}
+
+
+// Give feedback on the scored points by briefely showing it on screen.
+function score_feedback(points) {
+    var [x, y] = [game.world.centerX, game.world.centerY];
+    var text = game.add.bitmapText(x, y, 'desyrel',
+                                   (points >= 0 ? '+' : '') + points, 128);
+    text.anchor.setTo(0.5, 0.5);
+    game.add.tween(text).to({alpha: 0,
+                             height: 2 * text.height,
+                             width: 2 * text.width}, 500, null, true);
 }
 
 

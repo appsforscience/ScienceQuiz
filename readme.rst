@@ -13,6 +13,11 @@ copia local de::
 
   https://cdn.jsdelivr.net/npm/phaser-ce@2.10.0/build/phaser.js
 
+También usamos el plugin `Phaser Input`_, y tenemos una copia local
+para el desarrollo.
+
+.. `Phaser Input`: _https://github.com/orange-games/phaser-input
+
 
 Ejecutar
 --------

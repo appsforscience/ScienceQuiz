@@ -1,8 +1,10 @@
 // Prototype for ScienceQuiz, the quiz game!
 
-var game = new Phaser.Game(800, 800, Phaser.AUTO, 'game');  // use 720x1280?
+var game = new Phaser.Game(800, 800, Phaser.AUTO, 'game');
+// use 720x1280 instead of 800x800?
 
 game.global = {
+    name: '',
     score: 0,
     questions: {},
     done_categories: [],
@@ -17,6 +19,7 @@ function global_reset() {
 }
 
 game.state.add('load', state_load);
+game.state.add('intro', state_intro);
 game.state.add('menu', state_menu);
 game.state.add('play', state_play);
 game.state.add('final', state_final);
