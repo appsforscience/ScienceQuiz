@@ -382,7 +382,7 @@ function add_prize(x, y, category) {
         'Informática': 'Premio_Informatica',
         'Matemáticas': 'Premio_Mates',
         'Ciencias Naturales': 'Premio_Naturales'}[category];
-    if (category) {
+    if (image) {
         var medal = game.add.sprite(x, y, image);
         medal.anchor.setTo(0.5, 0.5);
         medal.scale.setTo(0.2, 0.2);
