@@ -16,7 +16,7 @@ copia local de::
 También usamos el plugin `Phaser Input`_, y tenemos una copia local
 para el desarrollo.
 
-.. _`Phaser Input`: _https://github.com/orange-games/phaser-input
+.. _`Phaser Input`: https://github.com/orange-games/phaser-input
 
 
 Ejecutar
