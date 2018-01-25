@@ -1,9 +1,5 @@
 // The different scenes ("states") of the game.
 
-// TODO:
-//  * Ask the name of the user (and use it to congratulate her at the end).
-//  * Check the time used to answer each question.
-
 //  ************************************************************************
 //  *                                                                      *
 //  *                                Load.                                 *
@@ -35,7 +31,7 @@ var state_load = {
     },
     create: function() {
         game.add.plugin(PhaserInput.Plugin);
-
+//        game.scale.scaleMode = Phaser.ScaleManager.boundingParent; // FIXME
         game.scale.pageAlignHorizontally = true;
         game.scale.pageAlignVeritcally = true;
 
@@ -48,7 +44,7 @@ var state_load = {
 // Fade in and out an image for the given amount of milliseconds.
 function flash_image(name, ms) {
     var img = game.add.sprite(game.world.centerX, game.world.centerY, name);
-    img.anchor.setTo(0.5, 0.5);
+    img.anchor.set(0.5);
     img.scale.setTo(2, 2);
     img.alpha = 0;
     game.add.tween(img).to({alpha: 1}, ms, null, true, 0, 0, true);
@@ -183,12 +179,10 @@ var state_menu = {
 
         var [x, y] = [game.world.centerX, 200];
 
-        var text = game.add.bitmapText(x, 50, 'desyrel', 'Puedes elegir...', 64);
-        text.anchor.setTo(0.5, 0.5);
-
+        var i = 1;
         for (category in game.global.questions) {
             if (game.global.done_categories.indexOf(category) === -1)
-                add_button(x, y, category, set_category_and_play(category));
+                add_button(x, y, category, set_category_and_play(category), 50 * i++);
             else
                 add_prize(x, y, category);
             y += 100;
@@ -222,13 +216,17 @@ function set_category_and_play(category, n_questions) {
 //  ************************************************************************
 
 var state_play = {
+    time: 0,
+    text_time: {},
     create: function() {
         add_background();
         var audio_yes = game.add.audio('yes', 0.1);
         var audio_nope = game.add.audio('nope', 0.1);
 
-        var text_score = game.add.bitmapText(5, 5, 'desyrel',
-                                             'Puntos: ' + game.global.score, 50);
+        time = game.time.time;
+        text_time = game.add.bitmapText(20, game.world.height - 100, 'desyrel',
+                                        '0', 50);
+        text_time.align = 'center';
 
         question = choose_question();
         if (question == undefined) {
@@ -253,13 +251,24 @@ var state_play = {
             var button = add_button(game.world.centerX, y, question['answers'][j],
                                     score_and_teach(points, audio,
                                                     question['comments'][j],
-                                                    question['image']));
+                                                    question['image']),
+                                   i * 50);
             y += button.height + 50;
         }
 
         add_sound_button();
+        add_score();
+    },
+    update: function() {
+        text_time.setText(Math.floor((game.time.time - time) / 1000));
     }
 };
+
+
+function add_score() {
+    return game.add.bitmapText(20, 5, 'desyrel',
+                               game.global.score, 50);
+}
 
 
 function add_background() {
@@ -276,11 +285,11 @@ function add_background() {
     var bg = game.add.sprite(xc / 2 + rand(xc), yc / 2 + rand(yc), bg_img);
     maximize(bg);
     bg.alpha = 0.2;
-    bg.anchor.setTo(0.5, 0.5);
+    bg.anchor.set(0.5);
     function move_bg() {
-        var bg_tween = game.add.tween(bg).to({x: xc / 2 + rand(xc),
-                                              y: yc / 2 + rand(yc)},
-                                             10000, null, true, 500);
+        var bg_tween = game.add.tween(bg).to({x: xc * 3 / 4 + rand(xc / 2),
+                                              y: yc * 3 / 4 + rand(yc / 2)},
+                                             20000, null, true, 1000);
         bg_tween.onComplete.addOnce(move_bg);
     }
     move_bg();
@@ -313,7 +322,7 @@ function score_and_teach(points, audio, txt, image) {
         text.setShadow(0, 0, 'rgba(0, 0, 0, 1)', 10);
         text.wordWrap = true;
         text.wordWrapWidth = 500;
-        text.anchor.setTo(0.5, 0.5);  // text centered at the given x, y
+        text.anchor.set(0.5);  // text centered at the given x, y
 
         score_feedback(points);
     };
@@ -342,11 +351,11 @@ var state_final = {
         var text_congrats = game.add.bitmapText(x, 100, 'desyrel',
                                                 'Enhorabuena\n' + game.global.name + '!!!', 80);
         text_congrats.align = 'center';
-        text_congrats.anchor.setTo(0.5, 0.5);
+        text_congrats.anchor.set(0.5);
         var text_score = game.add.bitmapText(x, y - 100, 'desyrel',
                                              'Total de puntos:\n' + game.global.score, 80);
         text_score.align = 'center';
-        text_score.anchor.setTo(0.5, 0.5);
+        text_score.anchor.set(0.5);
 
         var brag = 'He completado ScienceQuiz y conseguido ' +
             game.global.score + ' puntos!'.replace(/ /g, '%20');
@@ -384,29 +393,40 @@ function add_label(x, y, txt) {
     var text = game.add.text(x, y, txt,
                              {font: '25px Times', fill: 'black',
                               wordWrap: true, wordWrapWidth: 500, align: 'center'});
-    text.anchor.setTo(0.5, 0.5);  // text centered at the given x, y
+    text.anchor.set(0.5);  // text centered at the given x, y
     return text;
 }
 
 
 // Add button with text on it, at the given x, y position and calling
 // a callback when clicked.
-function add_button(x, y, txt, on_click) {
+function add_button(x, y, txt, on_click, delay_animation) {
     var group_button = game.add.group();
 
+    var shadow = game.add.button(5, 5, 'button', () => null, this, 0, 0, 0);
+    shadow.anchor.set(0.5);
+    shadow.tint = 0x000000;
+    shadow.alpha = 0.6;
+    group_button.add(shadow);
+
     var button = game.add.button(0, 0, 'button', on_click, this, 0, 1, 2);
-    button.anchor.setTo(0.5, 0.5);  // button centered at the given x, y
+    button.anchor.set(0.5);  // button centered at the given x, y
     group_button.add(button);
 
     var text = add_label(0, 0, txt);
     button.width = Math.max(400, text.width + 40);
     button.height = text.height + 30;
+    shadow.width = button.width;
+    shadow.height = button.height;
     group_button.add(text);
 
-    group_button.x = rand(2) * 2 * x;
-    group_button.y = rand(2) * 2 * y,
-    game.add.tween(group_button).to({x: x, y: y}, rand(500), null,
-                                    true, rand(200), 0);
+    group_button.x = -group_button.width;
+    group_button.y = y,
+
+
+    delay_animation = delay_animation || 0;
+    game.add.tween(group_button).to({x: x}, 300, null,
+                                    true, delay_animation, 0);
 
     return group_button;
 }
@@ -417,7 +437,7 @@ function score_feedback(points) {
     var [x, y] = [game.world.centerX, game.world.centerY];
     var text = game.add.bitmapText(x, y, 'desyrel',
                                    (points >= 0 ? '+' : '') + points, 128);
-    text.anchor.setTo(0.5, 0.5);
+    text.anchor.set(0.5);
     game.add.tween(text).to({alpha: 0,
                              height: 2 * text.height,
                              width: 2 * text.width}, 500, null, true);
@@ -435,7 +455,7 @@ function add_prize(x, y, category) {
         'Ciencias Naturales': 'Premio_Naturales'}[category];
     if (image) {
         var medal = game.add.sprite(x, y, image);
-        medal.anchor.setTo(0.5, 0.5);
+        medal.anchor.set(0.5);
         medal.scale.setTo(0.2, 0.2);
     }
 
