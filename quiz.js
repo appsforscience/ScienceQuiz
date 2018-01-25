@@ -31,7 +31,9 @@ var state_load = {
     },
     create: function() {
         game.add.plugin(PhaserInput.Plugin);
-//        game.scale.scaleMode = Phaser.ScaleManager.boundingParent; // FIXME
+        game.scale.windowConstraints.bottom = 'visual';
+        // See http://www.html5gamedevs.com/topic/11007-question-about-scale-mode-show_all-in-22/
+        game.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
         game.scale.pageAlignHorizontally = true;
         game.scale.pageAlignVeritcally = true;
 
