@@ -9,29 +9,32 @@
 var state_load = {
     label_loading: {},
     preload: function() {
-        game.load.image('logo', 'assets/logo.png');
-        game.load.image('speaker_on', 'assets/speaker_on.png');
-        game.load.image('speaker_off', 'assets/speaker_off.png');
-        game.load.image('math', 'assets/math.jpg');
-        game.load.image('biology', 'assets/biology.jpg');
-        game.load.image('astronomy', 'assets/astronomy.jpg');
-        game.load.image('Premio_Astronomia', 'assets/Premio_Astronomia.png');
-        game.load.image('Premio_Fisica', 'assets/Premio_Fisica.png');
-        game.load.image('Premio_Historia', 'assets/Premio_Historia.png');
-        game.load.image('Premio_Informatica', 'assets/Premio_Informatica.png');
-        game.load.image('Premio_Mates', 'assets/Premio_Mates.png');
-        game.load.image('Premio_Naturales', 'assets/Premio_Naturales.png');
-        game.load.audio('yes', 'assets/p-ping.mp3');
-        game.load.audio('nope', 'assets/explosion.mp3');
-        game.load.audio('blaster', 'assets/blaster.mp3');
-        game.load.audio('menu', 'assets/menu_select.mp3');
-        game.load.spritesheet('button', 'assets/button.png', 80, 20);
-        game.load.bitmapFont('desyrel', 'assets/desyrel.png', 'assets/desyrel.xml');
+        var gl = game.load;  // shortcut
+        gl.image('logo', 'assets/logo.png');
+        gl.image('speaker_on', 'assets/speaker_on.png');
+        gl.image('speaker_off', 'assets/speaker_off.png');
+        gl.image('prizes', 'assets/prizes.png');
+        gl.image('math', 'assets/math.jpg');
+        gl.image('biology', 'assets/biology.jpg');
+        gl.image('astronomy', 'assets/astronomy.jpg');
+        gl.image('check', 'assets/check.png');
+        gl.image('Premio_Astronomia', 'assets/Premio_Astronomia.png');
+        gl.image('Premio_Fisica', 'assets/Premio_Fisica.png');
+        gl.image('Premio_Historia', 'assets/Premio_Historia.png');
+        gl.image('Premio_Informatica', 'assets/Premio_Informatica.png');
+        gl.image('Premio_Mates', 'assets/Premio_Mates.png');
+        gl.image('Premio_Naturales', 'assets/Premio_Naturales.png');
+        gl.audio('yes', 'assets/p-ping.mp3');
+        gl.audio('nope', 'assets/explosion.mp3');
+        gl.audio('blaster', 'assets/blaster.mp3');
+        gl.audio('menu', 'assets/menu_select.mp3');
+        //gl.spritesheet('button', 'assets/button.png', 80, 20); /////
+        gl.bitmapFont('desyrel', 'assets/desyrel.png', 'assets/desyrel.xml');
         read_file('contents.tsv', load_contents);
         WebFontConfig = {
             google: { families: ['Ubuntu'] }
         };
-        game.load.script('webfont', '//ajax.googleapis.com/ajax/libs/webfont/1.4.7/webfont.js');
+        gl.script('webfont', '//ajax.googleapis.com/ajax/libs/webfont/1.4.7/webfont.js');
     },
     create: function() {
         game.add.plugin(PhaserInput.Plugin);
@@ -162,10 +165,10 @@ var state_intro = {
         // maybe something like this can fix the zoom problems?
 
         input.startFocus();
-        add_button(x, input.y + input.height + 100,
-                   'Pulsa cuando quieras', () => {
-                       game.global.name = input.text.text || 'persona anonima';
-                       game.state.start('menu');});
+        add_button(0xbbbbbb, input.y + input.height + 100,
+                           'Pulsa cuando quieras', () => {
+                               game.global.name = input.text.text || 'persona anonima';
+                               game.state.start('menu');});
     }
 };
 
@@ -190,24 +193,20 @@ var state_menu = {
 
         var [x, y] = [game.world.centerX, 200];
 
-        var color = {
-            'Historia': 0xffccaa,
-            'Matemáticas': 0xffeeaa,
-            'Física': 0xf38181,
-            'Ciencias Naturales': 0xdde9af,
-            'Tecnología': 0xe3d7f4,
-            'Astronomía': 0xd5f6ff};
         var i = 1;
         for (category in game.global.questions) {
             var element = {};
             if (game.global.done_categories.indexOf(category) === -1)
-                element = add_button_colored(color[category] || 0xcccccc, y, category,
-                                             set_category_and_play(category), 50 * i++);
+                element = add_button(game.global.color[category] || 0xcccccc,
+                                     y, category,
+                                     set_category_and_play(category),
+                                     50 * i++);
             else
-                element = add_prize(x, y, category);
+                element = add_done(y, category);
             y += element.height + 50;
         }
         add_sound_button();
+        add_prizes_button();
     }
 };
 
@@ -222,7 +221,7 @@ function set_category_and_play(category, n_questions) {
             n = n_questions;
         game.global.selected_questions = shuffle(n)
         if (n > 5)
-            game.global.selected_questions = game.global.selected_questions.slice(5);
+            game.global.selected_questions = game.global.selected_questions.slice(0, 5);
         game.global.current_question = 0;
         if (!game.sound.noAudio)
             game.add.audio('menu', 0.05).play();
@@ -257,8 +256,8 @@ var state_play = {
             return;
         }
 
-        add_label(game.world.centerX, 120, question['question']);
-        var y = 250;
+        var qtext = add_label(game.world.centerX, 120, question['question']);
+        var y = qtext.y + qtext.height + 100;
         reorder = shuffle(question['answers'].length);
         for (i = 0; i < question['answers'].length; i++) {
             var j = reorder[i];
@@ -270,11 +269,12 @@ var state_play = {
                 audio = audio_yes;
             }
 
-            var button = add_button(game.world.centerX, y, question['answers'][j],
+            var button = add_button(game.global.color[game.global.current_category], y,
+                                    question['answers'][j],
                                     score_and_teach(points, audio,
                                                     question['comments'][j],
                                                     question['image']),
-                                   i * 50);
+                                    i * 50);
             y += button.height + 50;
         }
 
@@ -298,23 +298,16 @@ function add_background() {
     var [xc, yc] = [game.world.centerX, game.world.centerY];
     // Quick hack, before we have all the backgrounds.
     var bg_img = '';
-    if (['Matemáticas', 'Física', 'Informática'].indexOf(game.global.current_category) >= 0)
+    if (['Matemáticas', 'Física', 'Tecnología'].indexOf(game.global.current_category) >= 0)
         bg_img = 'math';
-    else if (['Astronomía', 'Historia de la ciencia'].indexOf(game.global.current_category) >= 0)
+    else if (['Astronomía', 'Química'].indexOf(game.global.current_category) >= 0)
         bg_img = 'astronomy';
     else
         bg_img = 'biology';
-    var bg = game.add.sprite(xc / 2 + rand(xc), yc / 2 + rand(yc), bg_img);
-    maximize(bg);
+    var bg = game.add.sprite(xc, yc, bg_img);
+    maximize(bg, true);
     bg.alpha = 0.2;
     bg.anchor.set(0.5);
-    function move_bg() {
-        var bg_tween = game.add.tween(bg).to({x: xc * 3 / 4 + rand(xc / 2),
-                                              y: yc * 3 / 4 + rand(yc / 2)},
-                                             20000, null, true, 1000);
-        bg_tween.onComplete.addOnce(move_bg);
-    }
-    move_bg();
 }
 
 
@@ -361,6 +354,56 @@ function choose_question() {
 
 //  ************************************************************************
 //  *                                                                      *
+//  *                                Prizes                                *
+//  *                                                                      *
+//  ************************************************************************
+
+var state_prizes = {
+    create: function() {
+        game.stage.backgroundColor = '#48a';
+
+        function next(x, y) {
+            if (x > game.world.centerX)
+                return [game.world.centerX / 2, y + 300];
+            else
+                return [3 * game.world.centerX / 2, y];
+        }
+
+        var [x, y] = [game.world.centerX / 2, 200];
+        for (category in game.global.questions) {
+            var prize = add_prize(x, y, category);
+            if (game.global.done_categories.indexOf(category) == -1)
+                prize.alpha = 0.2;
+            [x, y] = next(x, y);
+        }
+
+        add_button(0xbbbbbb, y + 50, 'Volver al menú',
+                   () => { game.state.start('menu'); });
+    }
+};
+
+
+// Add an image with the prize that corresponds to a category and its name.
+function add_prize(x, y, category) {
+    var image = {
+        'Astronomía': 'Premio_Astronomia',
+        'Física': 'Premio_Fisica',
+        'Química': 'Premio_Historia',
+        'Tecnología': 'Premio_Informatica',
+        'Matemáticas': 'Premio_Mates',
+        'Ciencias Naturales': 'Premio_Naturales'}[category] || 'Premio_Mates';
+
+    var group = game.add.group();
+    var prize = game.add.sprite(x, y, image);
+    prize.anchor.set(0.5);
+    prize.scale.set(0.35);
+    var text = add_label(x, prize.y + prize.height / 2 + 10, category);
+    group.addMultiple([prize, text]);
+    return group;
+}
+
+//  ************************************************************************
+//  *                                                                      *
 //  *                                Final                                 *
 //  *                                                                      *
 //  ************************************************************************
@@ -382,10 +425,10 @@ var state_final = {
         var brag = 'He completado ScienceQuiz y conseguido ' +
             game.global.score + ' puntos!'.replace(/ /g, '%20');
         var tweet = 'https://twitter.com/intent/tweet?text=' + brag;
-        add_button(x, y + 100, 'Compartir en twitter',
-                   () => window.open(tweet, '_blank'));
-        add_button(x, y + 200, 'Volver a jugar',
-                   () => { global_reset(); game.state.start('menu'); });
+        add_button(0xbbbbbb, y + 100, 'Compartir en twitter',
+                           () => window.open(tweet, '_blank'));
+        add_button(0xbbbbbb, y + 200, 'Volver a jugar',
+                           () => { global_reset(); game.state.start('menu'); });
     }
 };
 
@@ -410,59 +453,34 @@ function add_sound_button() {
 }
 
 
+// Add prizes button.
+function add_prizes_button() {
+    var sprite = game.add.sprite(60, 30, 'prizes');
+
+    sprite.inputEnabled = true;
+    sprite.events.onInputDown.add(() => game.state.start('prizes'));
+}
+
+
 // Add label at position x, y.
 function add_label(x, y, txt) {
     var text = game.add.text(x, y, txt,
                              {font: 'Ubuntu', fontSize: 40, fill: 'black',
-                              wordWrap: true, wordWrapWidth: 500, align: 'center'});
-    text.anchor.set(0.5);  // text centered at the given x, y
+                              wordWrap: true, wordWrapWidth: 400, align: 'center'});
+    text.anchor.setTo(0.5, 0);
     return text;
-}
-
-
-// Add button with text on it, at the given x, y position and calling
-// a callback when clicked.
-function add_button(x, y, txt, on_click, delay_animation) {
-    var group_button = game.add.group();
-
-    var shadow = game.add.button(5, 5, 'button', () => null, this, 0, 0, 0);
-    shadow.anchor.set(0.5);
-    shadow.tint = 0x000000;
-    shadow.alpha = 0.6;
-    group_button.add(shadow);
-
-    var button = game.add.button(0, 0, 'button', on_click, this, 0, 1, 2);
-    button.anchor.set(0.5);  // button centered at the given x, y
-    group_button.add(button);
-
-    var text = add_label(0, 0, txt);
-    button.width = Math.max(400, text.width + 40);
-    button.height = text.height + 30;
-    shadow.width = button.width;
-    shadow.height = button.height;
-    group_button.add(text);
-
-    group_button.x = -group_button.width;
-    group_button.y = y,
-
-
-    delay_animation = delay_animation || 0;
-    game.add.tween(group_button).to({x: x}, 300, null,
-                                    true, delay_animation, 0);
-
-    return group_button;
 }
 
 
 // Add button with text on it, centered, at the given y, with a
 // callback when clicked.
-function add_button_colored(color, y, text, on_click, delay_animation) {
+function add_button(color, y, text, on_click, delay_animation) {
     var group_button = game.add.group();
     var button_text = add_label(0, y, text);
-    var [w, h] = [Math.max(400, button_text.width), button_text.height + 40];
+    var [w, h] = [Math.max(400, button_text.width) + 40, button_text.height + 40];
     function paint(rect, shift, color) {
         rect.beginFill(color, 1);
-        rect.drawRoundedRect(shift - w / 2, y + shift - h / 2, w, h, 5);
+        rect.drawRoundedRect(shift - w / 2, y - 20 + shift, w, h, 5);
         rect.endFill();
         return rect;
     }
@@ -473,9 +491,11 @@ function add_button_colored(color, y, text, on_click, delay_animation) {
     paint(button_fg, 0, color);
     group_button.addMultiple([button_bg, button_fg, button_text]);
 
+    var c = Phaser.Color.getRGB(color);
+    var color_dark = Phaser.Color.getColor(c.red * 0.9, c.green * 0.9, c.blue * 0.9);
     button_fg.inputEnabled = true;
     button_fg.input.useHandCursor = true;
-    button_fg.events.onInputOver.add(() => paint(button_fg, 0, Math.floor(color / 2 + 0.1)));
+    button_fg.events.onInputOver.add(() => paint(button_fg, 0, color_dark));
     button_fg.events.onInputOut.add(() => paint(button_fg, 0, color));
     button_fg.events.onInputDown.add(() => paint(button_fg, 0, 0x555555));
     button_fg.events.onInputUp.add(on_click);
@@ -500,28 +520,23 @@ function score_feedback(points) {
 }
 
 
-// Add an image with the prize that corresponds to a category and its name.
-function add_prize(x, y, category) {
-    var image = {
-        'Astronomía': 'Premio_Astronomia',
-        'Física': 'Premio_Fisica',
-        'Historia de la ciencia': 'Premio_Historia',
-        'Informática': 'Premio_Informatica',
-        'Matemáticas': 'Premio_Mates',
-        'Ciencias Naturales': 'Premio_Naturales'}[category];
-    if (image) {
-        var medal = game.add.sprite(x, y, image);
-        medal.anchor.set(0.5);
-        medal.scale.setTo(0.2, 0.2);
-    }
-
-    return add_label(x, y, category);
+// Add name of category with a checkmark on its left to indicate that
+// it is already done.
+function add_done(y, category) {
+    var check = game.add.sprite(game.world.centerX - 200, y, 'check');
+    check.anchor.set(0.5);
+    return add_label(game.world.centerX, y, category);
 }
 
 
 // Make the sprite use as much space as possible on the screen.
-function maximize(sprite) {
-    var scale = Math.min(game.world.width / sprite.width,
+function maximize(sprite, fill_all) {
+    var scale = 0;
+    if (!fill_all)
+        scale = Math.min(game.world.width / sprite.width,
+                         game.world.height / sprite.height);
+    else
+        scale = Math.max(game.world.width / sprite.width,
                          game.world.height / sprite.height);
     sprite.width *= scale;
     sprite.height *= scale;
