@@ -28,6 +28,10 @@ var state_load = {
         game.load.spritesheet('button', 'assets/button.png', 80, 20);
         game.load.bitmapFont('desyrel', 'assets/desyrel.png', 'assets/desyrel.xml');
         read_file('contents.tsv', load_contents);
+        WebFontConfig = {
+            google: { families: ['Ubuntu'] }
+        };
+        game.load.script('webfont', '//ajax.googleapis.com/ajax/libs/webfont/1.4.7/webfont.js');
     },
     create: function() {
         game.add.plugin(PhaserInput.Plugin);
@@ -38,7 +42,7 @@ var state_load = {
         game.scale.pageAlignVeritcally = true;
 
         flash_image('logo', 1000);
-        game.time.events.add(2000, () => game.state.start('intro'));
+        game.time.events.add(2000, () => game.state.start('menu'));
     },
 };
 
@@ -139,7 +143,7 @@ function has_new_category(fields) {
 
 var state_intro = {
     create: function() {
-        game.stage.backgroundColor = '#666';
+        game.stage.backgroundColor = '#808080';
         var [x, y] = [game.world.centerX, game.world.centerY];
         var label = add_label(x, y,
                               'Hola, ¡bonito peinado!\n¿Cómo te llamas?');
@@ -153,7 +157,10 @@ var state_intro = {
             borderColor: '#000',
             borderRadius: 6,
             textAlign: 'center'});
-        //input.setText('Anónimo');  // could be
+
+        //input.onKeyboardOpen(() => game.scale.reset());
+        // maybe something like this can fix the zoom problems?
+
         input.startFocus();
         add_button(x, input.y + input.height + 100,
                    'Pulsa cuando quieras', () => {
@@ -161,6 +168,8 @@ var state_intro = {
                        game.state.start('menu');});
     }
 };
+
+
 
 
 //  ************************************************************************
@@ -171,7 +180,7 @@ var state_intro = {
 
 var state_menu = {
     create: function() {
-        game.stage.backgroundColor = '#666';
+        game.stage.backgroundColor = '#aeaeae';
 
         if (game.global.done_categories.length ===
             Object.keys(game.global.questions).length) {
@@ -181,13 +190,22 @@ var state_menu = {
 
         var [x, y] = [game.world.centerX, 200];
 
+        var color = {
+            'Historia': 0xffccaa,
+            'Matemáticas': 0xffeeaa,
+            'Física': 0xf38181,
+            'Ciencias Naturales': 0xdde9af,
+            'Tecnología': 0xe3d7f4,
+            'Astronomía': 0xd5f6ff};
         var i = 1;
         for (category in game.global.questions) {
+            var element = {};
             if (game.global.done_categories.indexOf(category) === -1)
-                add_button(x, y, category, set_category_and_play(category), 50 * i++);
+                element = add_button_colored(color[category] || 0xcccccc, y, category,
+                                             set_category_and_play(category), 50 * i++);
             else
-                add_prize(x, y, category);
-            y += 100;
+                element = add_prize(x, y, category);
+            y += element.height + 50;
         }
         add_sound_button();
     }
@@ -203,6 +221,8 @@ function set_category_and_play(category, n_questions) {
         else
             n = n_questions;
         game.global.selected_questions = shuffle(n)
+        if (n > 5)
+            game.global.selected_questions = game.global.selected_questions.slice(5);
         game.global.current_question = 0;
         if (!game.sound.noAudio)
             game.add.audio('menu', 0.05).play();
@@ -393,7 +413,7 @@ function add_sound_button() {
 // Add label at position x, y.
 function add_label(x, y, txt) {
     var text = game.add.text(x, y, txt,
-                             {font: '25px Times', fill: 'black',
+                             {font: 'Ubuntu', fontSize: 40, fill: 'black',
                               wordWrap: true, wordWrapWidth: 500, align: 'center'});
     text.anchor.set(0.5);  // text centered at the given x, y
     return text;
@@ -434,6 +454,40 @@ function add_button(x, y, txt, on_click, delay_animation) {
 }
 
 
+// Add button with text on it, centered, at the given y, with a
+// callback when clicked.
+function add_button_colored(color, y, text, on_click, delay_animation) {
+    var group_button = game.add.group();
+    var button_text = add_label(0, y, text);
+    var [w, h] = [Math.max(400, button_text.width), button_text.height + 40];
+    function paint(rect, shift, color) {
+        rect.beginFill(color, 1);
+        rect.drawRoundedRect(shift - w / 2, y + shift - h / 2, w, h, 5);
+        rect.endFill();
+        return rect;
+    }
+
+    var button_bg = game.add.graphics(0, 0);
+    paint(button_bg, 5, 0x333333);
+    var button_fg = game.add.graphics(0, 0);
+    paint(button_fg, 0, color);
+    group_button.addMultiple([button_bg, button_fg, button_text]);
+
+    button_fg.inputEnabled = true;
+    button_fg.input.useHandCursor = true;
+    button_fg.events.onInputOver.add(() => paint(button_fg, 0, Math.floor(color / 2 + 0.1)));
+    button_fg.events.onInputOut.add(() => paint(button_fg, 0, color));
+    button_fg.events.onInputDown.add(() => paint(button_fg, 0, 0x555555));
+    button_fg.events.onInputUp.add(on_click);
+
+    delay_animation = delay_animation || 0;
+    group_button.x = - group_button.width;
+    game.add.tween(group_button).to({x: game.world.centerX}, 300, null,
+                                    true, delay_animation, 0);
+    return group_button;
+}
+
+
 // Give feedback on the scored points by briefely showing it on screen.
 function score_feedback(points) {
     var [x, y] = [game.world.centerX, game.world.centerY];
@@ -461,7 +515,7 @@ function add_prize(x, y, category) {
         medal.scale.setTo(0.2, 0.2);
     }
 
-    add_label(x, y, category);
+    return add_label(x, y, category);
 }
 
 
