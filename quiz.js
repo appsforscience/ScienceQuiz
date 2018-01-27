@@ -338,8 +338,8 @@ function score_and_teach(points, audio, txt, image) {
         }
 
         var text = game.add.text(game.world.centerX, game.world.centerY * 1.5, txt,
-                                 {fontSize: '32px', fill:'white'});
-        text.setShadow(0, 0, 'rgba(0, 0, 0, 1)', 10);
+                                 {fontSize: '32px', fill:'black'});
+        text.setShadow(0, 0, 'rgba(1, 1, 1, 0.4)', 10);
         text.wordWrap = true;
         text.wordWrapWidth = 500;
         text.anchor.set(0.5);  // text centered at the given x, y
