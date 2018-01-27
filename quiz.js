@@ -11,12 +11,16 @@ var state_load = {
     preload: function() {
         var gl = game.load;  // shortcut
         gl.image('logo', 'assets/logo.png');
+        gl.image('home', 'assets/home.png');
         gl.image('speaker_on', 'assets/speaker_on.png');
         gl.image('speaker_off', 'assets/speaker_off.png');
         gl.image('prizes', 'assets/prizes.png');
-        gl.image('math', 'assets/math.jpg');
-        gl.image('biology', 'assets/biology.jpg');
-        gl.image('astronomy', 'assets/astronomy.jpg');
+        gl.image('cat_phys', 'assets/cat_phys.jpg');
+        gl.image('cat_chem', 'assets/cat_chem.jpg');
+        gl.image('cat_math', 'assets/cat_math.jpg');
+        gl.image('cat_bio', 'assets/cat_bio.jpg');
+        gl.image('cat_tech', 'assets/cat_tech.jpg');
+        gl.image('cat_astro', 'assets/cat_astro.jpg');
         gl.image('check', 'assets/check.png');
         gl.image('Premio_Astronomia', 'assets/Premio_Astronomia.png');
         gl.image('Premio_Fisica', 'assets/Premio_Fisica.png');
@@ -28,7 +32,6 @@ var state_load = {
         gl.audio('nope', 'assets/explosion.mp3');
         gl.audio('blaster', 'assets/blaster.mp3');
         gl.audio('menu', 'assets/menu_select.mp3');
-        //gl.spritesheet('button', 'assets/button.png', 80, 20); /////
         gl.bitmapFont('desyrel', 'assets/desyrel.png', 'assets/desyrel.xml');
         read_file('contents.tsv', load_contents);
         WebFontConfig = {
@@ -54,7 +57,7 @@ var state_load = {
 function flash_image(name, ms) {
     var img = game.add.sprite(game.world.centerX, game.world.centerY, name);
     img.anchor.set(0.5);
-    img.scale.setTo(2, 2);
+    img.scale.set(3);
     img.alpha = 0;
     game.add.tween(img).to({alpha: 1}, ms, null, true, 0, 0, true);
 }
@@ -79,16 +82,16 @@ function read_file(fname, callback) {
 }
 
 
-// Save questions and load images from the raw text of the contents file.
+// Load questions and images from the raw text of the contents file.
 function load_contents(text) {
     var qs = parse_questions(text.replace(/\r/g, ''));
     for (category in qs)
         for (i = 0; i < qs[category].length; i++) {
             var img = qs[category][i]['image'];
-            if (img)
+            if (img && !img.startsWith('http'))
                 game.load.image(img, 'assets/' + img);
         }
-    game.load.start();  // force loading
+    game.load.start();  // force loading (it's automatic only in preload())
     game.global.questions = qs;
 }
 
@@ -129,9 +132,11 @@ function parse_questions(text) {
     return questions;
 }
 
+
 function is_empty(line) {
     return line.length === 0 || line[0] === '\t';
 }
+
 
 function has_new_category(fields) {
     return fields.length == 1 || fields[1].length === 0;
@@ -146,10 +151,9 @@ function has_new_category(fields) {
 
 var state_intro = {
     create: function() {
-        game.stage.backgroundColor = '#808080';
+        game.stage.backgroundColor = game.global.color['background'];
         var [x, y] = [game.world.centerX, game.world.centerY];
-        var label = add_label(x, y,
-                              'Hola, ¡bonito peinado!\n¿Cómo te llamas?');
+        var label = add_label(x, y, 'Hola, ¿cómo te llamas?');
         var input = game.add.inputField(x - 75, y + label.height, {
             font: '18px Arial',
             fill: '#212121',
@@ -166,13 +170,15 @@ var state_intro = {
 
         input.startFocus();
         add_button(0xbbbbbb, input.y + input.height + 100,
-                           'Pulsa cuando quieras', () => {
-                               game.global.name = input.text.text || 'persona anonima';
-                               game.state.start('menu');});
+                   'Pulsa cuando quieras', () => {
+                       game.global.name = input.text.text || 'persona anonima';
+                       game.state.start('menu');});
     }
 };
 
-
+// We are not using this state right now, because there are problems
+// with the mobile browsers zooming in when writting text, and the app
+// stops being usable.
 
 
 //  ************************************************************************
@@ -183,30 +189,32 @@ var state_intro = {
 
 var state_menu = {
     create: function() {
-        game.stage.backgroundColor = '#aeaeae';
-
         if (game.global.done_categories.length ===
             Object.keys(game.global.questions).length) {
             game.state.start('final');
             return;
         }
 
-        var [x, y] = [game.world.centerX, 200];
+        game.stage.backgroundColor = game.global.color['background'];
+        var header = add_menu_header();
 
-        var i = 1;
+        var [x, y] = [game.world.centerX, 250];
+
+        var delay_ms = 50;
         for (category in game.global.questions) {
             var element = {};
-            if (game.global.done_categories.indexOf(category) === -1)
-                element = add_button(game.global.color[category] || 0xcccccc,
+            if (game.global.done_categories.indexOf(category) === -1) {
+                element = add_button(game.global.color[category] || 0xffffff,
                                      y, category,
                                      set_category_and_play(category),
-                                     50 * i++);
-            else
+                                     delay_ms);
+                delay_ms += 50;
+            }
+            else {
                 element = add_done(y, category);
+            }
             y += element.height + 50;
         }
-        add_sound_button();
-        add_prizes_button();
     }
 };
 
@@ -237,17 +245,19 @@ function set_category_and_play(category, n_questions) {
 //  ************************************************************************
 
 var state_play = {
-    time: 0,
-    text_time: {},
+    time0: 0,
+    bar_time: {},
     create: function() {
-        add_background();
+        add_play_background();
         var audio_yes = game.add.audio('yes', 0.1);
         var audio_nope = game.add.audio('nope', 0.1);
+        add_play_header();
 
-        time = game.time.time;
-        text_time = game.add.bitmapText(20, game.world.height - 100, 'desyrel',
-                                        '0', 50);
-        text_time.align = 'center';
+        time0 = game.time.time;
+        bar_time = game.add.graphics(0, 200);
+        bar_time.beginFill(0x00ff00, 1);
+        bar_time.drawRect(game.world.width - 50, 0, 30, 0.8 * game.world.height);
+        bar_time.endFill();
 
         question = choose_question();
         if (question == undefined) {
@@ -256,7 +266,7 @@ var state_play = {
             return;
         }
 
-        var qtext = add_label(game.world.centerX, 120, question['question']);
+        var qtext = add_label(game.world.centerX, 160, question['question']);
         var y = qtext.y + qtext.height + 100;
         reorder = shuffle(question['answers'].length);
         for (i = 0; i < question['answers'].length; i++) {
@@ -277,33 +287,27 @@ var state_play = {
                                     i * 50);
             y += button.height + 50;
         }
-
-        add_sound_button();
-        add_score();
     },
     update: function() {
-        text_time.setText(Math.floor((game.time.time - time) / 1000));
+        var fraction = (20 + (time0 - game.time.time) / 1000) / 20;
+        if (fraction > 0) {
+            bar_time.height = 0.8 * game.world.height * fraction;
+            bar_time.y = 200 + 0.8 * game.world.height * (1 - fraction);
+        }
     }
 };
 
 
-function add_score() {
-    return game.add.bitmapText(20, 5, 'desyrel',
-                               game.global.score, 50);
-}
-
-
-function add_background() {
+function add_play_background() {
     game.stage.backgroundColor = '#fff';
     var [xc, yc] = [game.world.centerX, game.world.centerY];
-    // Quick hack, before we have all the backgrounds.
-    var bg_img = '';
-    if (['Matemáticas', 'Física', 'Tecnología'].indexOf(game.global.current_category) >= 0)
-        bg_img = 'math';
-    else if (['Astronomía', 'Química'].indexOf(game.global.current_category) >= 0)
-        bg_img = 'astronomy';
-    else
-        bg_img = 'biology';
+    var bg_img = {
+        'Física': 'cat_phys',
+        'Química': 'cat_chem',
+        'Matemáticas': 'cat_math',
+        'Ciencias Naturales': 'cat_bio',
+        'Astronomía': 'cat_astro',
+        'Tecnología': 'cat_tech'}[game.global.current_category];
     var bg = game.add.sprite(xc, yc, bg_img);
     maximize(bg, true);
     bg.alpha = 0.2;
@@ -319,12 +323,13 @@ function score_and_teach(points, audio, txt, image) {
         game.global.score += points;
 
         var graphics = game.add.graphics();
-        graphics.beginFill(0xFFFFFF, 1);
+        graphics.beginFill(0xffffff, 1);
         graphics.drawRect(0, 0, game.world.width, game.world.height);
+        graphics.endFill();
         graphics.inputEnabled = true;
         graphics.events.onInputDown.add(() => game.state.start('play'));
 
-        add_background();
+        add_play_background();
 
         if (image) {
             var sprite = game.add.sprite(game.world.centerX, 0, image);
@@ -332,7 +337,7 @@ function score_and_teach(points, audio, txt, image) {
             maximize(sprite);
         }
 
-        var text = game.add.text(game.world.centerX, game.world.centerY, txt,
+        var text = game.add.text(game.world.centerX, game.world.centerY * 1.5, txt,
                                  {fontSize: '32px', fill:'white'});
         text.setShadow(0, 0, 'rgba(0, 0, 0, 1)', 10);
         text.wordWrap = true;
@@ -360,7 +365,7 @@ function choose_question() {
 
 var state_prizes = {
     create: function() {
-        game.stage.backgroundColor = '#48a';
+        game.stage.backgroundColor = game.global.color['background'];
 
         function next(x, y) {
             if (x > game.world.centerX)
@@ -410,7 +415,7 @@ function add_prize(x, y, category) {
 
 var state_final = {
     create: function() {
-        game.stage.backgroundColor = '#48a';
+        game.stage.backgroundColor = game.global.color['background'];
 
         var [x, y] = [game.world.centerX, game.world.centerY];
         var text_congrats = game.add.bitmapText(x, 100, 'desyrel',
@@ -439,9 +444,48 @@ var state_final = {
 //  *                                                                      *
 //  ************************************************************************
 
+function add_menu_header() {
+    add_header_background();
+    add_prizes_button();
+    add_score();
+    add_sound_button();
+}
+
+
+function add_header_background() {
+    var graphics = game.add.graphics();
+    graphics.beginFill(0x000000, 0.8);
+    graphics.drawRect(0, 0, game.world.width, 140);
+    graphics.beginFill(0xd0d0d0, 1);
+    graphics.drawRect(0, 0, game.world.width, 130);
+    graphics.endFill();
+}
+
+
+function add_play_header() {
+    add_header_background();
+    add_home_button();
+    add_score();
+    add_sound_button();
+}
+
+
+function add_score() {
+    return game.add.bitmapText(game.world.width - 250, 30, 'desyrel',
+                               '' + game.global.score, 60);
+}
+
+
+function add_home_button() {
+    var sprite = game.add.sprite(60, 40, 'home');
+    sprite.inputEnabled = true;
+    sprite.events.onInputDown.add(() => game.state.start('menu'));
+}
+
+
 // Add sound on/of button.
 function add_sound_button() {
-    var sprite = game.add.sprite(game.width - 60, 30,
+    var sprite = game.add.sprite(game.width - 60, 50,
                                  game.sound.noAudio ? 'speaker_off' : 'speaker_on');
     function switch_audio() {
         game.sound.noAudio = !game.sound.noAudio;
@@ -501,7 +545,7 @@ function add_button(color, y, text, on_click, delay_animation) {
     button_fg.events.onInputUp.add(on_click);
 
     delay_animation = delay_animation || 0;
-    group_button.x = - group_button.width;
+    group_button.x = -group_button.width;
     game.add.tween(group_button).to({x: game.world.centerX}, 300, null,
                                     true, delay_animation, 0);
     return group_button;
@@ -516,7 +560,7 @@ function score_feedback(points) {
     text.anchor.set(0.5);
     game.add.tween(text).to({alpha: 0,
                              height: 2 * text.height,
-                             width: 2 * text.width}, 500, null, true);
+                             width: 2 * text.width}, 1500, null, true);
 }
 
 

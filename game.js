@@ -11,6 +11,7 @@ game.global = {
     selected_questions: [],
     current_question: 0,
     color: {
+        'background': 0xaeaeae,
         'Química': 0xffccaa,
         'Matemáticas': 0xffeeaa,
         'Física': 0xf38181,
