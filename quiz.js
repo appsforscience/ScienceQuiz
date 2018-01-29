@@ -109,8 +109,8 @@ function load_contents(text) {
 //               ... }
 function parse_questions(text) {
     var questions = {};
-    lines = text.split('\n').slice(3);
-    var category = "";
+    var lines = text.split('\n');
+    var category = '';
     var current_questions = [];
     for (var i = 0; i < lines.length; i++) {
         var fields = lines[i].split('\t');
@@ -370,8 +370,10 @@ function add_bar_time() {
 
 
 function add_play_background() {
-    game.stage.backgroundColor = '#fff';
-    var [xc, yc] = [game.world.centerX, game.world.centerY];
+    var graphics = game.add.graphics();
+    graphics.beginFill(0xffffff, 1);
+    graphics.drawRect(0, 0, game.world.width, game.world.height);
+    graphics.endFill();
     var bg_img = {
         'Física': 'cat_phys',
         'Química': 'cat_chem',
@@ -379,10 +381,11 @@ function add_play_background() {
         'Ciencias Naturales': 'cat_bio',
         'Astronomía': 'cat_astro',
         'Tecnología': 'cat_tech'}[game.global.current_category];
-    var bg = game.add.sprite(xc, yc, bg_img);
+    var bg = game.add.sprite(game.world.centerX, game.world.centerY, bg_img);
     maximize(bg, true);
-    bg.alpha = 0.2;
     bg.anchor.set(0.5);
+    bg.alpha = 0.2;
+    return bg;
 }
 
 
@@ -393,20 +396,14 @@ function score_and_teach(points, audio, txt, image) {
             audio.play();
         game.global.score += points;
 
-        var graphics = game.add.graphics();
-        graphics.beginFill(0xffffff, 1);
-        graphics.drawRect(0, 0, game.world.width, game.world.height);
-        graphics.endFill();
-        graphics.inputEnabled = true;
-        graphics.events.onInputDown.add(() => game.state.start('play'));
-
-        add_play_background();
+        var bg = add_play_background();
+        bg.inputEnabled = true;
+        bg.events.onInputDown.add(() => game.state.start('play'));
 
         if (image) {
             if (image.startsWith('http'))
                 image = 'missing';
-            var sprite = game.add.sprite(game.world.centerX, 0, image);
-            sprite.anchor.setTo(0.5, 0);
+            var sprite = game.add.sprite(0, 0, image);
             maximize(sprite);
         }
 
@@ -414,10 +411,10 @@ function score_and_teach(points, audio, txt, image) {
             game.world.centerX, game.world.centerY * 1.5, txt,
             {fontSize: '32px', fill:'black', align: 'center',
              wordWrap: true, wordWrapWidth: 600});
-        text.setShadow(0, 0, 'rgba(1, 1, 1, 0.4)', 10);
+        text.setShadow(0, 0, 'rgba(1, 1, 1, 0.3)', 10);
         text.anchor.set(0.5);  // text centered at the given x, y
 
-        show_earnings(points);
+        show_earnings(points);  // after the others so it's not covered
     };
 }
 
@@ -646,12 +643,9 @@ function add_done(y, category) {
 
 // Make the image use as much space as possible on the screen.
 function maximize(img, fill_all) {
-    var scale = 0;
     var gw = game.world;  // shortcut
-    if (!fill_all)
-        scale = Math.min(gw.width / img.width, gw.height / img.height);
-    else
-        scale = Math.max(gw.width / img.width, gw.height / img.height);
+    var choose = (!fill_all ? Math.min : Math.max);
+    var scale = choose(gw.width / img.width, gw.height / img.height);
     img.width *= scale;
     img.height *= scale;
 }
@@ -659,14 +653,12 @@ function maximize(img, fill_all) {
 
 // Return range(n) randomly shuffled.
 function shuffle(n) {
-    var reorder = new Array(n).fill().map((e, i) => i);  // reoder = range(n)
+    var a = new Array(n).fill().map((e, i) => i);  // a = range(n)
     for (var i = 0; i < n; i++) {
         var j = rand(n);
-        tmp = reorder[i];
-        reorder[i] = reorder[j];
-        reorder[j] = tmp;
+        [a[i], a[j]] = [a[j], a[i]];
     }
-    return reorder;
+    return a;
 }
 
 
