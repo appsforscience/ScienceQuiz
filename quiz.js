@@ -12,7 +12,7 @@ var state_load = {
         var gl = game.load;  // shortcut
 
         var images = [
-            'logo.png', 'check.png', 'home.png', 'prizes.png', 'missing.png',
+            'logo.png', 'check.png', 'prizes.png', 'missing.png',
             'speaker_on.png', 'speaker_off.png',
             'cat_phys.jpg', 'cat_chem.jpg', 'cat_math.jpg',
             'cat_bio.jpg', 'cat_astro.jpg', 'cat_tech.jpg',
@@ -23,11 +23,13 @@ var state_load = {
             gl.image(images[i].slice(0, -4), 'assets/' + images[i]);
 
         gl.spritesheet('dino', 'assets/dino.png', 200, 217, 3);
+        gl.spritesheet('home', 'assets/home_button.png', 60, 49);
 
         gl.audio('yes', 'assets/p-ping.mp3');
         gl.audio('nope', 'assets/explosion.mp3');
         gl.audio('blaster', 'assets/blaster.mp3');
         gl.audio('menu', 'assets/menu_select.mp3');
+        gl.audio('disabled', 'assets/steps2.mp3');
 
         gl.bitmapFont('desyrel', 'assets/desyrel.png', 'assets/desyrel.xml');
         gl.bitmapFont('inversionz', 'assets/inversionz.png',
@@ -284,13 +286,10 @@ function set_category_and_play(category, n_questions) {
     return () => {
         var gg = game.global;  // shortcut
         gg.current_category = category;
-        var n = 0;
         if (n_questions === undefined)
-            n = gg.questions[category].length;
-        else
-            n = n_questions;
-        gg.selected_questions = shuffle(n)
-        if (n > 5)
+            n_questions = gg.questions[category].length;
+        gg.selected_questions = shuffle(n_questions)
+        if (n_questions > 5)
             gg.selected_questions = gg.selected_questions.slice(0, 5);
         gg.current_question = 0;
         if (!game.sound.noAudio)
@@ -540,9 +539,8 @@ function add_score() {
 
 
 function add_home_button() {
-    var sprite = game.add.sprite(60, 40, 'home');
-    sprite.inputEnabled = true;
-    sprite.events.onInputDown.add(() => game.state.start('menu'));
+    game.add.button(60, 40, 'home', () => game.state.start('menu'),
+                    this, 1, 0, 1);
 }
 
 
@@ -556,15 +554,17 @@ function add_sound_button() {
     }
 
     img.inputEnabled = true;
+    img.input.useHandCursor = true;
     img.events.onInputDown.add(switch_audio);
 }
 
 
 // Add prizes button.
 function add_prizes_button() {
-    var img = game.add.sprite(60, 30, 'prizes');
+    var img = game.add.sprite(60, 40, 'prizes');
 
     img.inputEnabled = true;
+    img.input.useHandCursor = true;
     img.events.onInputDown.add(() => game.state.start('prizes'));
 }
 
@@ -635,9 +635,13 @@ function show_earnings(points) {
 // Add name of category with a checkmark on its left to indicate that
 // it is already done.
 function add_done(y, category) {
-    var check = game.add.sprite(game.world.centerX - 200, y, 'check');
-    check.anchor.set(0.5);
-    return add_label(game.world.centerX, y, category);
+    function disabled() {
+        if (!game.sound.noAudio)
+            game.add.audio('disabled', 0.5).play();
+    }
+    var button = add_button(game.global.color.default, y, category, disabled);
+    button.alpha = 0.2;
+    return button;
 }
 
 
