@@ -10,29 +10,32 @@ var state_load = {
     label_loading: {},
     preload: function() {
         var gl = game.load;  // shortcut
-        gl.image('logo', 'assets/logo.png');
-        gl.image('home', 'assets/home.png');
-        gl.image('speaker_on', 'assets/speaker_on.png');
-        gl.image('speaker_off', 'assets/speaker_off.png');
-        gl.image('prizes', 'assets/prizes.png');
-        gl.image('cat_phys', 'assets/cat_phys.jpg');
-        gl.image('cat_chem', 'assets/cat_chem.jpg');
-        gl.image('cat_math', 'assets/cat_math.jpg');
-        gl.image('cat_bio', 'assets/cat_bio.jpg');
-        gl.image('cat_tech', 'assets/cat_tech.jpg');
-        gl.image('cat_astro', 'assets/cat_astro.jpg');
-        gl.image('check', 'assets/check.png');
-        gl.image('Premio_Astronomia', 'assets/Premio_Astronomia.png');
-        gl.image('Premio_Fisica', 'assets/Premio_Fisica.png');
-        gl.image('Premio_Historia', 'assets/Premio_Historia.png');
-        gl.image('Premio_Informatica', 'assets/Premio_Informatica.png');
-        gl.image('Premio_Mates', 'assets/Premio_Mates.png');
-        gl.image('Premio_Naturales', 'assets/Premio_Naturales.png');
+
+        var images = [
+            'logo.png', 'check.png', 'home.png', 'prizes.png', 'missing.png',
+            'speaker_on.png', 'speaker_off.png',
+            'cat_phys.jpg', 'cat_chem.jpg', 'cat_math.jpg',
+            'cat_bio.jpg', 'cat_astro.jpg', 'cat_tech.jpg',
+            'Premio_Fisica.png', 'Premio_Historia.png', 'Premio_Mates.png',
+            'Premio_Naturales.png', 'Premio_Astronomia.png',
+            'Premio_Informatica.png'];
+        for (var i = 0; i < images.length; i++)
+            gl.image(images[i].slice(0, -4), 'assets/' + images[i]);
+
+        gl.spritesheet('dino', 'assets/dino.png', 200, 217, 3);
+
         gl.audio('yes', 'assets/p-ping.mp3');
         gl.audio('nope', 'assets/explosion.mp3');
         gl.audio('blaster', 'assets/blaster.mp3');
         gl.audio('menu', 'assets/menu_select.mp3');
+
         gl.bitmapFont('desyrel', 'assets/desyrel.png', 'assets/desyrel.xml');
+        gl.bitmapFont('inversionz', 'assets/inversionz.png',
+                      'assets/inversionz.xml');
+        // inversionz from https://www.dafont.com/inversionz.font
+        //   convert -background none -fill black -font Inversionz.ttf -pointsize 80 label:"-0123456789" inversionz.png
+        // to extract, and later (tediously) generate the xml fnt file.
+
         read_file('contents.tsv', load_contents);
         WebFontConfig = {
             google: { families: ['Ubuntu'] }
@@ -48,7 +51,7 @@ var state_load = {
         game.scale.pageAlignVeritcally = true;
 
         flash_image('logo', 1000);
-        game.time.events.add(2000, () => game.state.start('menu'));
+        game.time.events.add(2000, () => game.state.start('pretutorial'));
     },
 };
 
@@ -85,8 +88,8 @@ function read_file(fname, callback) {
 // Load questions and images from the raw text of the contents file.
 function load_contents(text) {
     var qs = parse_questions(text.replace(/\r/g, ''));
-    for (category in qs)
-        for (i = 0; i < qs[category].length; i++) {
+    for (var category in qs)
+        for (var i = 0; i < qs[category].length; i++) {
             var img = qs[category][i]['image'];
             if (img && !img.startsWith('http'))
                 game.load.image(img, 'assets/' + img);
@@ -109,7 +112,7 @@ function parse_questions(text) {
     lines = text.split('\n').slice(3);
     var category = "";
     var current_questions = [];
-    for (i = 0; i < lines.length; i++) {
+    for (var i = 0; i < lines.length; i++) {
         var fields = lines[i].split('\t');
         if (is_empty(lines[i]))
             ;  // skip
@@ -151,7 +154,8 @@ function has_new_category(fields) {
 
 var state_intro = {
     create: function() {
-        game.stage.backgroundColor = game.global.color['background'];
+        var gg = game.global;  // shortcut
+        game.stage.backgroundColor = gg.color['background'];
         var [x, y] = [game.world.centerX, game.world.centerY];
         var label = add_label(x, y, 'Hola, ¿cómo te llamas?');
         var input = game.add.inputField(x - 75, y + label.height, {
@@ -165,14 +169,14 @@ var state_intro = {
             borderRadius: 6,
             textAlign: 'center'});
 
-        //input.onKeyboardOpen(() => game.scale.reset());
+        // input.onKeyboardOpen(() => game.scale.reset());
         // maybe something like this can fix the zoom problems?
 
         input.startFocus();
-        add_button(0xbbbbbb, input.y + input.height + 100,
+        add_button(gg.color.default, input.y + input.height + 100,
                    'Pulsa cuando quieras', () => {
-                       game.global.name = input.text.text || 'persona anonima';
-                       game.state.start('menu');});
+                       gg.name = input.text.text || 'persona anónima';
+                       game.state.start('pretutorial');});
     }
 };
 
@@ -183,54 +187,112 @@ var state_intro = {
 
 //  ************************************************************************
 //  *                                                                      *
+//  *                             Pretutorial                              *
+//  *                                                                      *
+//  ************************************************************************
+
+var state_pretutorial = {
+    create: function() {
+        var gg = game.global;  // shortcut
+        add_button(gg.color.default, 300, 'Tutorial',
+                   () => game.state.start('tutorial'), 50);
+        add_button(gg.color.default, 500, 'Jugar',
+                   () => game.state.start('menu'), 100);
+    }
+};
+
+
+//  ************************************************************************
+//  *                                                                      *
+//  *                               Tutorial                               *
+//  *                                                                      *
+//  ************************************************************************
+
+var state_tutorial = {
+    create: function() {
+        add_button(game.global.color.default, 500, 'Jugar',
+                   () => game.state.start('menu'), 50);
+        // TODO
+    }
+};
+
+
+//  ************************************************************************
+//  *                                                                      *
 //  *                                 Menu                                 *
 //  *                                                                      *
 //  ************************************************************************
 
 var state_menu = {
     create: function() {
-        if (game.global.done_categories.length ===
-            Object.keys(game.global.questions).length) {
-            game.state.start('final');
-            return;
+        var gg = game.global;  // shortcut
+        if (gg.done_categories.length < Object.keys(gg.questions).length) {
+            add_menu_background();
+            add_menu_header();
+            add_category_buttons();
+            add_puppy();
         }
-
-        game.stage.backgroundColor = game.global.color['background'];
-        var header = add_menu_header();
-
-        var [x, y] = [game.world.centerX, 250];
-
-        var delay_ms = 50;
-        for (category in game.global.questions) {
-            var element = {};
-            if (game.global.done_categories.indexOf(category) === -1) {
-                element = add_button(game.global.color[category] || 0xffffff,
-                                     y, category,
-                                     set_category_and_play(category),
-                                     delay_ms);
-                delay_ms += 50;
-            }
-            else {
-                element = add_done(y, category);
-            }
-            y += element.height + 50;
+        else {
+            game.state.start('final');
         }
     }
 };
 
 
+function add_menu_background() {
+    game.stage.backgroundColor = game.global.color['background'];
+}
+
+
+function add_menu_header() {
+    add_header_background();
+    add_prizes_button();
+    add_score();
+    add_sound_button();
+}
+
+
+function add_puppy() {
+    var puppy = game.add.sprite(0, 0, 'dino');
+    puppy.y = game.world.height - puppy.height;
+    puppy.animations.add('blink', [0, 0, 2, 2, 0, 0, 2, 0, 2, 2, 0, 0, 1]);
+    puppy.animations.play('blink', 5, true);
+}
+
+
+function add_category_buttons() {
+    var y = 250;
+    var delay_ms = 50;
+    var gg = game.global;  // shortcut
+    for (var category in gg.questions) {
+        var element = {};
+        if (gg.done_categories.indexOf(category) === -1) {
+            element = add_button(gg.color[category] || gg.color.default,
+                                 y, category,
+                                 set_category_and_play(category), delay_ms);
+            delay_ms += 50;
+        }
+        else {
+            element = add_done(y, category);
+        }
+        y += element.height + 50;
+    }
+}
+
+
 function set_category_and_play(category, n_questions) {
     return () => {
-        game.global.current_category = category;
+        var gg = game.global;  // shortcut
+        gg.current_category = category;
         var n = 0;
         if (n_questions === undefined)
-            n = game.global.questions[category].length;
+            n = gg.questions[category].length;
         else
             n = n_questions;
-        game.global.selected_questions = shuffle(n)
+        gg.selected_questions = shuffle(n)
         if (n > 5)
-            game.global.selected_questions = game.global.selected_questions.slice(0, 5);
-        game.global.current_question = 0;
+            gg.selected_questions = gg.selected_questions.slice(0, 5);
+        gg.current_question = 0;
         if (!game.sound.noAudio)
             game.add.audio('menu', 0.05).play();
         game.state.start('play');
@@ -249,15 +311,11 @@ var state_play = {
     bar_time: {},
     create: function() {
         add_play_background();
-        var audio_yes = game.add.audio('yes', 0.1);
-        var audio_nope = game.add.audio('nope', 0.1);
         add_play_header();
+        add_puppy();
 
         time0 = game.time.time;
-        bar_time = game.add.graphics(0, 200);
-        bar_time.beginFill(0x00ff00, 1);
-        bar_time.drawRect(game.world.width - 50, 0, 30, 0.8 * game.world.height);
-        bar_time.endFill();
+        bar_time = add_bar_time();
 
         question = choose_question();
         if (question == undefined) {
@@ -267,26 +325,8 @@ var state_play = {
         }
 
         var qtext = add_label(game.world.centerX, 160, question['question']);
-        var y = qtext.y + qtext.height + 100;
-        reorder = shuffle(question['answers'].length);
-        for (i = 0; i < question['answers'].length; i++) {
-            var j = reorder[i];
-
-            var points = 0;
-            var audio = audio_nope;
-            if (j === 0) {
-                points = 10;  // the first answer is the right one
-                audio = audio_yes;
-            }
-
-            var button = add_button(game.global.color[game.global.current_category], y,
-                                    question['answers'][j],
-                                    score_and_teach(points, audio,
-                                                    question['comments'][j],
-                                                    question['image']),
-                                    i * 50);
-            y += button.height + 50;
-        }
+        add_answers(qtext.y + qtext.height + 100, question['answers'],
+                    question['comments'], question['image']);
     },
     update: function() {
         var fraction = (20 + (time0 - game.time.time) / 1000) / 20;
@@ -296,6 +336,37 @@ var state_play = {
         }
     }
 };
+
+
+function add_answers(y, answers, comments, image) {
+    var audio_yes = game.add.audio('yes', 0.1);
+    var audio_nope = game.add.audio('nope', 0.1);
+    reorder = shuffle(answers.length);
+    var delay_ms = 50;
+    for (var i = 0; i < answers.length; i++) {
+        var j = reorder[i];
+
+        var points = (j === 0 ? 10 : 0);  // the 1st answer is the right one
+        var audio = (j === 0 ? audio_yes : audio_nope);
+
+        var color = game.global.color[game.global.current_category];
+        var button = add_button(color, y, answers[j],
+                                score_and_teach(points, audio,
+                                                comments[j], image),
+                                delay_ms);
+        delay_ms += 50;
+        y += button.height + 50;
+    }
+}
+
+
+function add_bar_time() {
+    var bar_time = game.add.graphics(0, 200);
+    bar_time.beginFill(0x00ff00, 1);
+    bar_time.drawRect(game.world.width - 50, 0, 30, 0.8 * game.world.height);
+    bar_time.endFill();
+    return bar_time;
+}
 
 
 function add_play_background() {
@@ -332,19 +403,21 @@ function score_and_teach(points, audio, txt, image) {
         add_play_background();
 
         if (image) {
+            if (image.startsWith('http'))
+                image = 'missing';
             var sprite = game.add.sprite(game.world.centerX, 0, image);
             sprite.anchor.setTo(0.5, 0);
             maximize(sprite);
         }
 
-        var text = game.add.text(game.world.centerX, game.world.centerY * 1.5, txt,
-                                 {fontSize: '32px', fill:'black'});
+        var text = game.add.text(
+            game.world.centerX, game.world.centerY * 1.5, txt,
+            {fontSize: '32px', fill:'black', align: 'center',
+             wordWrap: true, wordWrapWidth: 600});
         text.setShadow(0, 0, 'rgba(1, 1, 1, 0.4)', 10);
-        text.wordWrap = true;
-        text.wordWrapWidth = 500;
         text.anchor.set(0.5);  // text centered at the given x, y
 
-        score_feedback(points);
+        show_earnings(points);
     };
 }
 
@@ -375,14 +448,14 @@ var state_prizes = {
         }
 
         var [x, y] = [game.world.centerX / 2, 200];
-        for (category in game.global.questions) {
+        for (var category in game.global.questions) {
             var prize = add_prize(x, y, category);
             if (game.global.done_categories.indexOf(category) == -1)
                 prize.alpha = 0.2;
             [x, y] = next(x, y);
         }
 
-        add_button(0xbbbbbb, y + 50, 'Volver al menú',
+        add_button(game.global.color.default, y + 50, 'Volver al menú',
                    () => { game.state.start('menu'); });
     }
 };
@@ -407,6 +480,7 @@ function add_prize(x, y, category) {
     return group;
 }
 
+
 //  ************************************************************************
 //  *                                                                      *
 //  *                                Final                                 *
@@ -417,23 +491,23 @@ var state_final = {
     create: function() {
         game.stage.backgroundColor = game.global.color['background'];
 
-        var [x, y] = [game.world.centerX, game.world.centerY];
-        var text_congrats = game.add.bitmapText(x, 100, 'desyrel',
-                                                'Enhorabuena\n' + game.global.name + '!!!', 80);
-        text_congrats.align = 'center';
-        text_congrats.anchor.set(0.5);
-        var text_score = game.add.bitmapText(x, y - 100, 'desyrel',
-                                             'Total de puntos:\n' + game.global.score, 80);
-        text_score.align = 'center';
-        text_score.anchor.set(0.5);
+        function add_text(y, txt) {
+            var text = game.add.bitmapText(game.world.centerX, y, 'desyrel',
+                                           txt, 80);
+            text.align = 'center';
+            text.anchor.set(0.5);
+        }
+
+        add_text(200, 'Enhorabuena\n' + game.global.name + '!!!');
+        add_text(500, 'Total de puntos:\n' + game.global.score);
 
         var brag = 'He completado ScienceQuiz y conseguido ' +
             game.global.score + ' puntos!'.replace(/ /g, '%20');
         var tweet = 'https://twitter.com/intent/tweet?text=' + brag;
-        add_button(0xbbbbbb, y + 100, 'Compartir en twitter',
-                           () => window.open(tweet, '_blank'));
-        add_button(0xbbbbbb, y + 200, 'Volver a jugar',
-                           () => { global_reset(); game.state.start('menu'); });
+        add_button(game.global.color.default, 700, 'Compartir en twitter',
+                   () => window.open(tweet, '_blank'));
+        add_button(game.global.color.default, 850, 'Volver a jugar',
+                   () => { global_reset(); game.state.start('menu'); });
     }
 };
 
@@ -443,14 +517,6 @@ var state_final = {
 //  *                              Utilities                               *
 //  *                                                                      *
 //  ************************************************************************
-
-function add_menu_header() {
-    add_header_background();
-    add_prizes_button();
-    add_score();
-    add_sound_button();
-}
-
 
 function add_header_background() {
     var graphics = game.add.graphics();
@@ -471,7 +537,7 @@ function add_play_header() {
 
 
 function add_score() {
-    return game.add.bitmapText(game.world.width - 250, 30, 'desyrel',
+    return game.add.bitmapText(game.world.width - 250, 30, 'inversionz',
                                '' + game.global.score, 60);
 }
 
@@ -485,24 +551,24 @@ function add_home_button() {
 
 // Add sound on/of button.
 function add_sound_button() {
-    var sprite = game.add.sprite(game.width - 60, 50,
-                                 game.sound.noAudio ? 'speaker_off' : 'speaker_on');
+    var img = game.add.sprite(game.width - 60, 50,
+                              'speaker_' + (game.sound.noAudio ? 'off' : 'on'));
     function switch_audio() {
         game.sound.noAudio = !game.sound.noAudio;
-        sprite.loadTexture(game.sound.noAudio ? 'speaker_off' : 'speaker_on');
+        img.loadTexture('speaker_' + (game.sound.noAudio ? 'off' : 'on'));
     }
 
-    sprite.inputEnabled = true;
-    sprite.events.onInputDown.add(switch_audio);
+    img.inputEnabled = true;
+    img.events.onInputDown.add(switch_audio);
 }
 
 
 // Add prizes button.
 function add_prizes_button() {
-    var sprite = game.add.sprite(60, 30, 'prizes');
+    var img = game.add.sprite(60, 30, 'prizes');
 
-    sprite.inputEnabled = true;
-    sprite.events.onInputDown.add(() => game.state.start('prizes'));
+    img.inputEnabled = true;
+    img.events.onInputDown.add(() => game.state.start('prizes'));
 }
 
 
@@ -510,7 +576,8 @@ function add_prizes_button() {
 function add_label(x, y, txt) {
     var text = game.add.text(x, y, txt,
                              {font: 'Ubuntu', fontSize: 40, fill: 'black',
-                              wordWrap: true, wordWrapWidth: 400, align: 'center'});
+                              wordWrap: true, wordWrapWidth: 600,
+                              align: 'center'});
     text.anchor.setTo(0.5, 0);
     return text;
 }
@@ -520,8 +587,11 @@ function add_label(x, y, txt) {
 // callback when clicked.
 function add_button(color, y, text, on_click, delay_animation) {
     var group_button = game.add.group();
+
     var button_text = add_label(0, y, text);
-    var [w, h] = [Math.max(400, button_text.width) + 40, button_text.height + 40];
+
+    var w = Math.max(400, button_text.width) + 40;
+    var h = button_text.height + 40;
     function paint(rect, shift, color) {
         rect.beginFill(color, 1);
         rect.drawRoundedRect(shift - w / 2, y - 20 + shift, w, h, 5);
@@ -536,12 +606,13 @@ function add_button(color, y, text, on_click, delay_animation) {
     group_button.addMultiple([button_bg, button_fg, button_text]);
 
     var c = Phaser.Color.getRGB(color);
-    var color_dark = Phaser.Color.getColor(c.red * 0.9, c.green * 0.9, c.blue * 0.9);
+    var over = Phaser.Color.getColor(c.red * 0.9, c.green * 0.9, c.blue * 0.9);
+    var click = Phaser.Color.getColor(c.red * 0.8, c.green * 0.8, c.blue * 0.8);
     button_fg.inputEnabled = true;
     button_fg.input.useHandCursor = true;
-    button_fg.events.onInputOver.add(() => paint(button_fg, 0, color_dark));
+    button_fg.events.onInputOver.add(() => paint(button_fg, 0, over));
     button_fg.events.onInputOut.add(() => paint(button_fg, 0, color));
-    button_fg.events.onInputDown.add(() => paint(button_fg, 0, 0x555555));
+    button_fg.events.onInputDown.add(() => paint(button_fg, 0, click));
     button_fg.events.onInputUp.add(on_click);
 
     delay_animation = delay_animation || 0;
@@ -553,9 +624,9 @@ function add_button(color, y, text, on_click, delay_animation) {
 
 
 // Give feedback on the scored points by briefely showing it on screen.
-function score_feedback(points) {
-    var [x, y] = [game.world.centerX, game.world.centerY];
-    var text = game.add.bitmapText(x, y, 'desyrel',
+function show_earnings(points) {
+    var gw = game.world;
+    var text = game.add.bitmapText(gw.centerX, gw.centerY, 'desyrel',
                                    (points >= 0 ? '+' : '') + points, 128);
     text.anchor.set(0.5);
     game.add.tween(text).to({alpha: 0,
@@ -573,24 +644,23 @@ function add_done(y, category) {
 }
 
 
-// Make the sprite use as much space as possible on the screen.
-function maximize(sprite, fill_all) {
+// Make the image use as much space as possible on the screen.
+function maximize(img, fill_all) {
     var scale = 0;
+    var gw = game.world;  // shortcut
     if (!fill_all)
-        scale = Math.min(game.world.width / sprite.width,
-                         game.world.height / sprite.height);
+        scale = Math.min(gw.width / img.width, gw.height / img.height);
     else
-        scale = Math.max(game.world.width / sprite.width,
-                         game.world.height / sprite.height);
-    sprite.width *= scale;
-    sprite.height *= scale;
+        scale = Math.max(gw.width / img.width, gw.height / img.height);
+    img.width *= scale;
+    img.height *= scale;
 }
 
 
 // Return range(n) randomly shuffled.
 function shuffle(n) {
     var reorder = new Array(n).fill().map((e, i) => i);  // reoder = range(n)
-    for (i = 0; i < n; i++) {
+    for (var i = 0; i < n; i++) {
         var j = rand(n);
         tmp = reorder[i];
         reorder[i] = reorder[j];

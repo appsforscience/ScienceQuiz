@@ -7,10 +7,11 @@ game.global = {
     score: 0,
     questions: {},
     done_categories: [],
-    current_category: "",
+    current_category: '',
     selected_questions: [],
     current_question: 0,
     color: {
+        'default': 0xc0c0c0,
         'background': 0xaeaeae,
         'Química': 0xffccaa,
         'Matemáticas': 0xffeeaa,
@@ -27,6 +28,8 @@ function global_reset() {
 
 game.state.add('load', state_load);
 game.state.add('intro', state_intro);
+game.state.add('pretutorial', state_pretutorial);
+game.state.add('tutorial', state_tutorial);
 game.state.add('menu', state_menu);
 game.state.add('play', state_play);
 game.state.add('prizes', state_prizes);
