@@ -12,7 +12,7 @@ var state_load = {
         var gl = game.load;  // shortcut
 
         var images = [
-            'logo.png', 'check.png', 'prizes.png', 'missing.png',
+            'logo.png', 'prizes.png', 'missing.png',
             'speaker_on.png', 'speaker_off.png',
             'cat_phys.jpg', 'cat_chem.jpg', 'cat_math.jpg',
             'cat_bio.jpg', 'cat_astro.jpg', 'cat_tech.jpg',
@@ -93,8 +93,8 @@ function load_contents(text) {
     for (var category in qs)
         for (var i = 0; i < qs[category].length; i++) {
             var img = qs[category][i]['image'];
-            if (img && !img.startsWith('http'))
-                game.load.image(img, 'assets/' + img);
+            if (img)
+                game.load.image(img, 'assets/images_comments/' + img);
         }
     game.load.start();  // force loading (it's automatic only in preload())
     game.global.questions = qs;
@@ -125,10 +125,28 @@ function parse_questions(text) {
             current_questions = [];
         }
         else {
+            img = fields[7];
+            if (img && img.startsWith('http')) {
+                img = img.split('/').slice(-1)[0]
+                img = img.replace('%20', ' ');
+                img = img.replace('%21', '!');
+                img = img.replace('%22', '"');
+                img = img.replace('%23', '#');
+                img = img.replace('%24', '$');
+                img = img.replace('%25', '%');
+                img = img.replace('%26', '&');
+                img = img.replace('%27', "'");
+                img = img.replace('%28', '(');
+                img = img.replace('%29', ')');
+                img = img.replace('%2C', ',');
+                img = img.replace('%C2%A9', '©');
+                img = img.replace('%C3%B1', 'ñ');
+            }
+
             current_questions.push({question: fields[0],
                                     answers: fields.slice(1, 4),
                                     comments: fields.slice(4, 7),
-                                    image: fields[7]});
+                                    image: img});
         }
     }
     if (current_questions.length != 0)  // we are missing the last category
@@ -563,6 +581,7 @@ function add_sound_button() {
 function add_prizes_button() {
     var img = game.add.sprite(60, 40, 'prizes');
 
+    img.scale.set(1.2);
     img.inputEnabled = true;
     img.input.useHandCursor = true;
     img.events.onInputDown.add(() => game.state.start('prizes'));
