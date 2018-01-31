@@ -337,11 +337,13 @@ var state_play = {
         question = choose_question();
         if (question == undefined) {
             game.global.done_categories.push(game.global.current_category);
+            show_medal();
+            // TODO: add delay
             game.state.start('menu');
             return;
         }
 
-        var qtext = add_label(game.world.centerX, 160, question['question']);
+        var qtext = add_question(question['question']);
         add_answers(qtext.y + qtext.height + 100, question['answers'],
                     question['comments'], question['image']);
     },
@@ -353,6 +355,33 @@ var state_play = {
         }
     }
 };
+
+
+function show_medal() {
+    var medal = add_medal(game.world.centerX, game.world.centerY,
+                          game.global.current_category);
+    medal.alpha = 0;
+    maximize(medal);
+    game.add.tween(medal).to({alpha: 1}, 1000, null, true, 0, 0, true);
+}
+
+
+function add_question(text) {
+    var bubble = game.add.graphics(0, 0);
+    bubble.beginFill(0xffffff, 1);
+    var qtext = add_label(game.world.centerX, 160, text);
+    bubble.x = qtext.x - qtext.width / 2 - 30;
+    bubble.y = qtext.y - 10;
+    bubble.lineStyle(4, 0x000000, 0.5);
+    bubble.drawRoundedRect(0, 0, qtext.width + 60, qtext.height + 20, 9);
+    bubble.alpha = 0.9;
+    bubble.endFill();
+
+    // TODO: add line connecting the bubble with dino
+    // (see https://phaser.io/examples/v2/display/graphics)
+
+    return qtext;
+}
 
 
 function add_answers(y, answers, comments, image) {
@@ -475,8 +504,7 @@ var state_prizes = {
 };
 
 
-// Add an image with the prize that corresponds to a category and its name.
-function add_prize(x, y, category) {
+function add_medal(x, y, category) {
     var image = {
         'Astronomía': 'Premio_Astronomia',
         'Física': 'Premio_Fisica',
@@ -484,10 +512,16 @@ function add_prize(x, y, category) {
         'Tecnología': 'Premio_Informatica',
         'Matemáticas': 'Premio_Mates',
         'Ciencias Naturales': 'Premio_Naturales'}[category] || 'Premio_Mates';
+    var medal = game.add.sprite(x, y, image);
+    medal.anchor.set(0.5);
+    return medal;
+}
 
+
+// Add an image with the prize that corresponds to a category and its name.
+function add_prize(x, y, category) {
     var group = game.add.group();
-    var prize = game.add.sprite(x, y, image);
-    prize.anchor.set(0.5);
+    var prize = add_medal(x, y, category);
     prize.scale.set(0.35);
     var text = add_label(x, prize.y + prize.height / 2 + 10, category);
     group.addMultiple([prize, text]);
