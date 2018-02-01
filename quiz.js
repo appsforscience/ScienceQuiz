@@ -23,6 +23,7 @@ var state_load = {
             gl.image(images[i].slice(0, -4), 'assets/' + images[i]);
 
         gl.spritesheet('dino', 'assets/dino.png', 200, 217, 3);
+        gl.spritesheet('dino_yes', 'assets/dino_yes.png', 200, 228, 3);
         gl.spritesheet('home', 'assets/home_button.png', 60, 49);
 
         gl.audio('yes', 'assets/p-ping.mp3');
@@ -176,7 +177,8 @@ var state_intro = {
     create: function() {
         var gg = game.global;  // shortcut
         game.stage.backgroundColor = gg.color['background'];
-        gg.name = prompt('\n¡Hola!\n\n¿Cómo te llamas?\n', get_default_name());
+        var name = prompt('\n¡Hola!\n\n¿Cómo te llamas?\n', get_default_name());
+        gg.name = name.slice(0, 16) || 'persona anónima';
         game.state.start('pretutorial');
     }
 };
@@ -241,7 +243,7 @@ var state_menu = {
             add_menu_background();
             add_menu_header();
             add_category_buttons();
-            add_puppy();
+            add_dino();
         }
         else {
             game.state.start('final');
@@ -263,11 +265,21 @@ function add_menu_header() {
 }
 
 
-function add_puppy() {
-    var puppy = game.add.sprite(0, 0, 'dino');
+function add_dino(action) {
+    var name = '';
+    var sequence = [];
+    if (action === undefined) {
+        name = 'dino';
+        sequence = [0, 0, 2, 2, 0, 0, 2, 0, 2, 2, 0, 0, 1];
+    }
+    else if (action === 'yes') {
+        name = 'dino_yes';
+        sequence = [0, 1, 0, 2];
+    }
+    var puppy = game.add.sprite(0, 0, name);
     puppy.y = game.world.height - puppy.height;
-    puppy.animations.add('blink', [0, 0, 2, 2, 0, 0, 2, 0, 2, 2, 0, 0, 1]);
-    puppy.animations.play('blink', 5, true);
+    puppy.animations.add('animation', sequence)
+    puppy.animations.play('animation', 5, true);
 }
 
 
@@ -320,7 +332,7 @@ var state_play = {
     create: function() {
         add_play_background();
         add_play_header();
-        add_puppy();
+        add_dino();
 
         time0 = game.time.time;
         bar_time = add_bar_time();
@@ -329,14 +341,10 @@ var state_play = {
         if (question == undefined) {
             game.global.done_categories.push(game.global.current_category);
             show_medal();
-            // TODO: add delay
-            var timer = game.time.create();
-            timer.add(5000, () => game.state.start('menu'));
-            timer.start();
             return;
         }
 
-        var qtext = add_question(question['question']);
+        var qtext = add_dino_talk(question['question']);
         add_answers(250, question['answers'],
                     question['comments'], question['image']);
     },
@@ -351,6 +359,10 @@ var state_play = {
 
 
 function show_medal() {
+    var bg = add_play_background();
+    bg.inputEnabled = true;
+    bg.events.onInputDown.add(() => game.state.start('menu'));
+    add_dino('yes');
     var medal = add_medal(game.world.centerX, game.world.centerY,
                           game.global.current_category);
     medal.alpha = 0;
@@ -359,7 +371,7 @@ function show_medal() {
 }
 
 
-function add_question(text) {
+function add_dino_talk(text) {
     var bubble = game.add.graphics(0, 0);
     bubble.beginFill(0xffffff, 1);
     var qtext = add_label(game.world.centerX, 0, text);
@@ -582,8 +594,9 @@ function add_play_header() {
 
 
 function add_score() {
-    return game.add.bitmapText(game.world.width - 250, 30, 'inversionz',
-                               '' + game.global.score, 60);
+    var score =  game.add.bitmapText(game.world.width - 100, 30, 'inversionz',
+                                     '' + game.global.score, 60);
+    score.anchor.setTo(1, 0);
 }
 
 
