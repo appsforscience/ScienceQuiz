@@ -45,15 +45,15 @@ var state_load = {
         gl.script('webfont', '//ajax.googleapis.com/ajax/libs/webfont/1.4.7/webfont.js');
     },
     create: function() {
-        game.add.plugin(PhaserInput.Plugin);
         game.scale.windowConstraints.bottom = 'visual';
         // See http://www.html5gamedevs.com/topic/11007-question-about-scale-mode-show_all-in-22/
         game.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
+
         game.scale.pageAlignHorizontally = true;
         game.scale.pageAlignVeritcally = true;
 
         flash_image('logo', 1000);
-        game.time.events.add(2000, () => game.state.start('pretutorial'));
+        game.time.events.add(2000, () => game.state.start('intro'));
     },
 };
 
@@ -176,33 +176,24 @@ var state_intro = {
     create: function() {
         var gg = game.global;  // shortcut
         game.stage.backgroundColor = gg.color['background'];
-        var [x, y] = [game.world.centerX, game.world.centerY];
-        var label = add_label(x, y, 'Hola, ¿cómo te llamas?');
-        var input = game.add.inputField(x - 75, y + label.height, {
-            font: '18px Arial',
-            fill: '#212121',
-            fontWeight: 'bold',
-            width: 150,
-            padding: 8,
-            borderWidth: 1,
-            borderColor: '#000',
-            borderRadius: 6,
-            textAlign: 'center'});
-
-        // input.onKeyboardOpen(() => game.scale.reset());
-        // maybe something like this can fix the zoom problems?
-
-        input.startFocus();
-        add_button(gg.color.default, input.y + input.height + 100,
-                   'Pulsa cuando quieras', () => {
-                       gg.name = input.text.text || 'persona anónima';
-                       game.state.start('pretutorial');});
+        gg.name = prompt('\n¡Hola!\n\n¿Cómo te llamas?\n', get_default_name());
+        game.state.start('pretutorial');
     }
 };
 
-// We are not using this state right now, because there are problems
-// with the mobile browsers zooming in when writting text, and the app
-// stops being usable.
+
+function get_default_name() {
+    return game.rnd.pick([
+        'RATS',
+        'Sherlock',
+        'Fry',
+        'Leela',
+        'Bender',
+        'Zoidberg',
+        'Leia',
+        'Wendy Freedman',
+        'Winnie the Pooh']);
+}
 
 
 //  ************************************************************************
@@ -346,14 +337,14 @@ var state_play = {
         }
 
         var qtext = add_question(question['question']);
-        add_answers(qtext.y + qtext.height + 100, question['answers'],
+        add_answers(250, question['answers'],
                     question['comments'], question['image']);
     },
     update: function() {
-        var fraction = (20 + (time0 - game.time.time) / 1000) / 20;
+        var fraction = (25 + (time0 - game.time.time) / 1000) / 25;
         if (fraction > 0) {
-            bar_time.height = 0.8 * game.world.height * fraction;
-            bar_time.y = 200 + 0.8 * game.world.height * (1 - fraction);
+            bar_time.height = 0.83 * game.world.height * fraction;
+            bar_time.y = 200 + 0.83 * game.world.height * (1 - fraction);
         }
     }
 };
@@ -371,7 +362,8 @@ function show_medal() {
 function add_question(text) {
     var bubble = game.add.graphics(0, 0);
     bubble.beginFill(0xffffff, 1);
-    var qtext = add_label(game.world.centerX, 160, text);
+    var qtext = add_label(game.world.centerX, 0, text);
+    qtext.y = game.world.height - qtext.height - 250;
     bubble.x = qtext.x - qtext.width / 2 - 30;
     bubble.y = qtext.y - 10;
     bubble.lineStyle(4, 0x000000, 0.5);
@@ -411,7 +403,8 @@ function add_answers(y, answers, comments, image) {
 function add_bar_time() {
     var bar_time = game.add.graphics(0, 200);
     bar_time.beginFill(0x00ff00, 1);
-    bar_time.drawRect(game.world.width - 50, 0, 30, 0.8 * game.world.height);
+    bar_time.lineStyle(2, 0x000000, 0.8);
+    bar_time.drawRect(game.world.width - 40, 0, 30, game.world.height);
     bar_time.endFill();
     return bar_time;
 }
@@ -448,19 +441,21 @@ function score_and_teach(points, audio, txt, image) {
         bg.inputEnabled = true;
         bg.events.onInputDown.add(() => game.state.start('play'));
 
+        var y_text = 50;
         if (image) {
             if (image.startsWith('http'))
                 image = 'missing';
             var sprite = game.add.sprite(0, 0, image);
             maximize(sprite);
+            y_text += sprite.y + sprite.height;
         }
 
         var text = game.add.text(
-            game.world.centerX, game.world.centerY * 1.5, txt,
+            game.world.centerX, y_text, txt,
             {fontSize: '32px', fill:'black', align: 'center',
              wordWrap: true, wordWrapWidth: 600});
         text.setShadow(0, 0, 'rgba(1, 1, 1, 0.3)', 10);
-        text.anchor.set(0.5);  // text centered at the given x, y
+        text.anchor.setTo(0.5, 0);
 
         show_earnings(points);  // after the others so it's not covered
     };
@@ -628,7 +623,7 @@ function add_prizes_button() {
 function add_label(x, y, txt) {
     var text = game.add.text(x, y, txt,
                              {font: 'Ubuntu', fontSize: 40, fill: 'black',
-                              wordWrap: true, wordWrapWidth: 600,
+                              wordWrap: true, wordWrapWidth: 550,
                               align: 'center'});
     text.anchor.setTo(0.5, 0);
     return text;
