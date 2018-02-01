@@ -55,6 +55,19 @@ Las imágenes grandes se pueden convertir a un tamaño razonable con::
   convert -resize 400 img_big.jpg img.jpg
 
 
+Compilación para Android con Cocoon
+-----------------------------------
+
+Instrucciones en http://www.emanueleferonato.com/2017/11/01/step-by-step-guide-to-create-android-native-games-in-html5-with-cocoon-io-and-without-android-studio/
+
+Resumen:
+
+- Incluir en index.html la línea: "<script src="cordova.js"></script>" antes que cualquier otro script
+- Añadir en la carpeta principal el archivo cordova.js (descargable en https://github.com/apache/cordova-js/blob/master/src/cordova.js)
+- Crear un fichero zip y subir a Cocoon
+
+
+
 Herramientas colaborativas
 --------------------------
 
