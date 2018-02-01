@@ -339,7 +339,9 @@ var state_play = {
             game.global.done_categories.push(game.global.current_category);
             show_medal();
             // TODO: add delay
-            game.state.start('menu');
+            var timer = game.time.create();
+            timer.add(5000, () => game.state.start('menu'));
+            timer.start();
             return;
         }
 
@@ -362,7 +364,7 @@ function show_medal() {
                           game.global.current_category);
     medal.alpha = 0;
     maximize(medal);
-    game.add.tween(medal).to({alpha: 1}, 1000, null, true, 0, 0, true);
+    game.add.tween(medal).to({alpha: 1}, 1000, null, true, 0, 0, false);
 }
 
 
