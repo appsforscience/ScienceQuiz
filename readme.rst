@@ -63,7 +63,7 @@ Instrucciones en http://www.emanueleferonato.com/2017/11/01/step-by-step-guide-t
 Resumen:
 
 - Incluir en index.html la línea: "<script src="cordova.js"></script>" antes que cualquier otro script
-- Añadir en la carpeta principal el archivo cordova.js (descargable en https://github.com/apache/cordova-js/blob/master/src/cordova.js)
+- Añadir en la carpeta principal el archivo cordova.js (descargable en https://raw.githubusercontent.com/apache/cordova-js/master/src/cordova.js)
 - Crear un fichero zip y subir a Cocoon
 
 
