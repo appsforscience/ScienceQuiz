@@ -355,6 +355,7 @@ var state_play = {
     update: function() {
         var fraction = (25 + (time0 - game.time.time) / 1000) / 25;
         if (fraction > 0) {
+            game.global.points_extra = Math.floor(fraction * 100);
             bar_time.height = 0.83 * game.world.height * fraction;
             bar_time.y = 200 + 0.83 * game.world.height * (1 - fraction);
         }
@@ -407,7 +408,7 @@ function add_answers(y, answers, comments, image) {
     for (var i = 0; i < answers.length; i++) {
         var j = reorder[i];
 
-        var points = (j === 0 ? 10 : 0);  // the 1st answer is the right one
+        var points = (j === 0 ? 100 : -10);  // the 1st answer is the right one
         var audio = (j === 0 ? audio_yes : audio_nope);
 
         var color = game.global.color[game.global.current_category];
@@ -456,6 +457,8 @@ function score_and_teach(points, audio, txt, image) {
     return () => {
         if (!game.sound.noAudio)
             audio.play();
+        if (points > 0)
+            points += game.global.points_extra;
         game.global.score += points;
 
         var bg = add_play_background();

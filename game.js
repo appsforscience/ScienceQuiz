@@ -5,6 +5,7 @@ var game = new Phaser.Game(720, 1280, Phaser.AUTO, 'game');
 game.global = {
     name: '',
     score: 0,
+    points_extra: 0,
     questions: {},
     done_categories: [],
     current_category: '',
