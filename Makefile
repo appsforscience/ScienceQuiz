@@ -1,4 +1,6 @@
-all: upload
+all:
+	@echo make upload - uploads the game to metamagical.org
+	@echo make zip - creates a zip that can be used with cocoon
 
 upload:
 	rsync -azv -e ssh *.html *.js *.tsv assets bb:/var/www/metamagical.org/phaser
