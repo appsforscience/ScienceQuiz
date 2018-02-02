@@ -228,7 +228,7 @@ var state_tutorial = {
 var state_menu = {
     create: function() {
         var gg = game.global;  // shortcut
-        if (gg.done_categories.length < Object.keys(gg.questions).length) {
+        if (Object.keys(gg.results).length < Object.keys(gg.questions).length) {
             add_menu_background();
             add_menu_header();
             add_category_buttons();
@@ -278,7 +278,7 @@ function add_category_buttons() {
     var gg = game.global;  // shortcut
     for (var category in gg.questions) {
         var element = {};
-        if (gg.done_categories.indexOf(category) === -1) {
+        if (Object.keys(gg.results).indexOf(category) === -1) {
             element = add_button(gg.color[category] || gg.color.default,
                                  y, category,
                                  set_category_and_play(category), delay_ms);
@@ -342,9 +342,8 @@ var state_play = {
         bar_time = add_bar_time();
 
         question = choose_question();
-        if (question == undefined) {
-            game.global.done_categories.push(game.global.current_category);
-            show_medal();
+        if (question === undefined) {
+            give_prize();
             return;
         }
 
@@ -363,18 +362,29 @@ var state_play = {
 };
 
 
-function show_medal() {
+// Gives a category medal... if earned.
+function give_prize() {
     var bg = add_play_background();
     bg.inputEnabled = true;
     bg.events.onInputDown.add(() => game.state.start('menu'));
     var medal = add_medal(game.world.centerX, game.world.centerY - 100,
                           game.global.current_category);
-    medal.alpha = 0;
+    medal.alpha = 0.2;
     maximize(medal);
-    add_dino('yes');
-    add_dino_talk(game.rnd.pick([
-        '¡Genial!', '¡Bravo!', '¡Estupendo!', '¡Qué guay!']));
-    game.add.tween(medal).to({alpha: 1}, 1000, null, true, 0, 0, false);
+    if (is_good_result(game.global.current_category)) {
+        add_dino('yes');
+        add_dino_talk(game.rnd.pick([
+            '¡Genial!', '¡Bravo!', '¡Estupendo!', '¡Qué guay!']));
+        game.add.tween(medal).to({alpha: 1}, 1000, null, true, 0, 0, false);
+        var points = 300;
+        game.global.score += points;
+        show_earnings(points);  // after the others so it's not covered
+    }
+    else {
+        add_dino();
+        add_dino_talk(game.rnd.pick([
+            'Otra vez será', 'La próxima irá mejor', '¡Ánimo!']));
+    }
 }
 
 
@@ -455,11 +465,18 @@ function add_play_background() {
 // Increase the global score and show a text and image.
 function score_and_teach(points, audio, txt, image) {
     return () => {
+        var gg = game.global;  // shortcut
         if (!game.sound.noAudio)
             audio.play();
         if (points > 0)
-            points += game.global.points_extra;
-        game.global.score += points;
+            points += gg.points_extra;
+        gg.score += points;
+
+        // Add points to the result of this question.
+        if (Object.keys(gg.results).indexOf(gg.current_category) === -1)
+            gg.results[gg.current_category] = [];
+        var i = gg.selected_questions[gg.current_question];
+        gg.results[gg.current_category].push([i, points]);
 
         var bg = add_play_background();
         bg.inputEnabled = true;
@@ -514,7 +531,7 @@ var state_prizes = {
         var [x, y] = [game.world.centerX / 2, 200];
         for (var category in game.global.questions) {
             var prize = add_prize(x, y, category);
-            if (game.global.done_categories.indexOf(category) == -1)
+            if (!is_good_result(category))
                 prize.alpha = 0.2;
             [x, y] = next(x, y);
         }
@@ -523,6 +540,19 @@ var state_prizes = {
                    () => { game.state.start('menu'); });
     }
 };
+
+
+function is_good_result(category) {
+    var gg = game.global;  // shortcut
+    if (Object.keys(gg.results).indexOf(category) === -1)
+        return false;
+    var res = gg.results[category];
+    var total_right = 0;
+    for (var i = 0; i < res.length; i++)
+        if (res[i][1] > 0)
+            total_right++;
+    return total_right / res.length > 0.5;
+}
 
 
 function add_medal(x, y, category) {

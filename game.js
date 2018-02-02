@@ -7,7 +7,7 @@ game.global = {
     score: 0,
     points_extra: 0,
     questions: {},
-    done_categories: [],
+    results: {},
     current_category: '',
     selected_questions: [],
     current_question: 0,
@@ -24,7 +24,7 @@ game.global = {
 
 function global_reset() {
     game.global.score = 0;
-    game.global.done_categories = [];
+    game.global.results = {};
 }
 
 game.state.add('load', state_load);
