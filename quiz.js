@@ -39,7 +39,7 @@ var state_load = {
         //   convert -background none -fill black -font Inversionz.ttf -pointsize 80 label:"-0123456789" inversionz.png
         // to extract, and later (tediously) generate the xml fnt file.
 
-        read_file('contents.tsv', load_contents);
+        read_file('contents.tsv');
         WebFontConfig = {
             google: { families: ['Ubuntu'] }
         };
@@ -76,29 +76,18 @@ function read_file(fname, callback) {
     request.open('GET', fname, true);
     request.onload = (e) => {
         if (request.readyState === 4) {
-            if (request.status === 200)
-                callback(request.responseText);
-            else
+            if (request.status === 200) {
+                var text = request.responseText.replace(/\r/g, '');
+                game.global.questions = parse_questions(text);
+            }
+            else {
                 game.debug.text('Problema al leer: ' + fname,
                                 game.world.centerX, game.world.centerY);
+            }
         }
     };
     request.onerror = (e) => game.debug.text(request.statusText);
     request.send(null);
-}
-
-
-// Load questions and images from the raw text of the contents file.
-function load_contents(text) {
-    var qs = parse_questions(text.replace(/\r/g, ''));
-    for (var category in qs)
-        for (var i = 0; i < qs[category].length; i++) {
-            var img = qs[category][i]['image'];
-            if (img)
-                game.load.image(img, 'assets/images_comments/' + img);
-        }
-    game.load.start();  // force loading (it's automatic only in preload())
-    game.global.questions = qs;
 }
 
 
@@ -303,6 +292,8 @@ function add_category_buttons() {
 }
 
 
+// Return a function that, when called, starts asking questions of the
+// given category (so, actually "playing").
 function set_category_and_play(category, n_questions) {
     return () => {
         var gg = game.global;  // shortcut
@@ -312,11 +303,24 @@ function set_category_and_play(category, n_questions) {
         gg.selected_questions = shuffle(n_questions)
         if (n_questions > 5)
             gg.selected_questions = gg.selected_questions.slice(0, 5);
+        load_images();
         gg.current_question = 0;
         if (!game.sound.noAudio)
             game.add.audio('menu', 0.05).play();
         game.state.start('play');
     };
+}
+
+
+// Load the images that correspond to the currently selected questions.
+function load_images() {
+    var gg = game.global;  // shortcut
+    var questions = gg.questions[gg.current_category];
+    for (var i = 0; i < gg.selected_questions.length; i++) {
+        var img = questions[gg.selected_questions[i]]['image'];
+        game.load.image(img, 'assets/images_comments/' + img);
+    }
+    game.load.start();  // force loading (it's automatic only in preload())
 }
 
 
@@ -362,11 +366,13 @@ function show_medal() {
     var bg = add_play_background();
     bg.inputEnabled = true;
     bg.events.onInputDown.add(() => game.state.start('menu'));
-    add_dino('yes');
-    var medal = add_medal(game.world.centerX, game.world.centerY,
+    var medal = add_medal(game.world.centerX, game.world.centerY - 100,
                           game.global.current_category);
     medal.alpha = 0;
     maximize(medal);
+    add_dino('yes');
+    add_dino_talk(game.rnd.pick([
+        '¡Genial!', '¡Bravo!', '¡Estupendo!', '¡Qué guay!']));
     game.add.tween(medal).to({alpha: 1}, 1000, null, true, 0, 0, false);
 }
 
@@ -383,8 +389,11 @@ function add_dino_talk(text) {
     bubble.alpha = 0.9;
     bubble.endFill();
 
-    // TODO: add line connecting the bubble with dino
-    // (see https://phaser.io/examples/v2/display/graphics)
+    var line = game.add.graphics(0, 0);
+    line.lineStyle(4, 0x000000, 0.5);
+    line.moveTo(210, game.world.height - 130);
+    line.quadraticCurveTo(qtext.x, game.world.height - 150,
+                          qtext.x, qtext.y + qtext.height + 20);
 
     return qtext;
 }
