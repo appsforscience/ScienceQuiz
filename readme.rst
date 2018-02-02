@@ -62,11 +62,12 @@ Instrucciones en http://www.emanueleferonato.com/2017/11/01/step-by-step-guide-t
 
 Resumen:
 
-* Incluir en `index.html` la línea: `<script src="cordova.js"></script>` antes que cualquier otro script.
+* Incluir en ``index.html`` la línea: ``<script src="cordova.js"></script>`` antes que cualquier otro script.
 * Añadir en la carpeta principal el archivo `cordova.js`_.
-* Crear un fichero zip y subir a Cocoon.
+* Crear un fichero zip y subir a `Cocoon`_.
 
 .. _`cordova.js`: https://raw.githubusercontent.com/apache/cordova-js/master/src/cordova.js
+.. _`Cocoon`: https://cocoon.io/
 
 
 Herramientas colaborativas
