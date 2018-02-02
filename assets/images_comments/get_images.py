@@ -2,7 +2,7 @@
 
 """
 Read image urls from contents.tsv, download them and convert them
-to widht 300px.
+to width 300px.
 """
 
 import os
@@ -13,12 +13,17 @@ def main():
     for url in get_urls():
         fname = url_decode(url.rsplit('/', 1)[-1])
         if not os.path.exists(fname):
+            print('-- Downloading new file:', fname)
             sp.call(['wget', '-nv', url])
 
         if is_image(fname):
-            sp.call(['convert', '-verbose', '-resize', '300', fname, fname])
+            if get_size(fname)[0] != 300:
+                print('-- Converting to 300px width:', fname)
+                sp.call(['convert', '-verbose', '-resize', '300', fname, fname])
+            else:
+                print('-- Already has 300px width:', fname)
         else:
-            print('Not an image:', fname)
+            print('-- Not an image:', fname)
 
 
 def get_urls():
@@ -52,8 +57,20 @@ def url_decode(txt):
 
 
 def is_image(fname):
+    "Return True if file fname is an image"
     mime = sp.check_output(['file', '--mime-type', fname]).split()[-1]
     return mime.decode('utf8').startswith('image/')
+
+
+def get_size(fname):
+    "Return (width, height) of the image in fname"
+    fields = sp.check_output(['file', fname]).split(b',')
+    # Depending on the image type, the command "file" says the size at...
+    for ext, pos in [('jpg', -2), ('jpeg', -2), ('png', -3), ('gif', -1)]:
+        if fname.lower().endswith('.' + ext):
+            size = fields[pos].split(b'x')  # '300x200' -> ['300', '200']
+            return (int(size[0]), int(size[1]))
+    return (None, None)
 
 
 
