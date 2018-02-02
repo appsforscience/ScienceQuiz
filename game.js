@@ -11,6 +11,7 @@ game.global = {
     current_category: '',
     selected_questions: [],
     current_question: 0,
+    ticking: false,
     color: {
         'default': 0xc0c0c0,
         'background': 0xaeaeae,

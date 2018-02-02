@@ -338,11 +338,13 @@ var state_play = {
         add_play_header();
         add_dino();
 
+        game.global.ticking = true;
         time0 = game.time.time;
         bar_time = add_bar_time();
 
         question = choose_question();
         if (question === undefined) {
+            game.global.ticking = false;
             give_prize();
             return;
         }
@@ -352,11 +354,20 @@ var state_play = {
                     question['comments'], question['image']);
     },
     update: function() {
+        if (!game.global.ticking)
+            return;
+
         var fraction = (25 + (time0 - game.time.time) / 1000) / 25;
         if (fraction > 0) {
             game.global.points_extra = Math.floor(fraction * 100);
             bar_time.height = 0.83 * game.world.height * fraction;
             bar_time.y = 200 + 0.83 * game.world.height * (1 - fraction);
+        }
+        else if (fraction < -0.02) {
+            var text = game.rnd.pick([
+                '¡Más rápido!', '¿Problemas con el tiempo?',
+                '¡Ánimo!', 'El tiempo vuela, ¿eh?']);
+            score_and_teach(0, game.add.audio('nope', 0.1), text, '')();
         }
     }
 };
@@ -466,6 +477,7 @@ function add_play_background() {
 function score_and_teach(points, audio, txt, image) {
     return () => {
         var gg = game.global;  // shortcut
+        gg.ticking = false;
         if (!game.sound.noAudio)
             audio.play();
         if (points > 0)
