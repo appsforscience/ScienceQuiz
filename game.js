@@ -13,8 +13,10 @@ game.global = {
     current_question: 0,
     ticking: false,
     color: {
-        'default': 0xc0c0c0,
-        'background': 0xaeaeae,
+        'default': 0xaeaeae,
+        'background': 0xd0d0d0,
+        'header': 0x83de83,
+        'bar': 0xfbc52c,
         'Química': 0xffccaa,
         'Matemáticas': 0xffeeaa,
         'Física': 0xf38181,

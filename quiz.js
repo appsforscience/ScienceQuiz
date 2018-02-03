@@ -12,7 +12,7 @@ var state_load = {
         var gl = game.load;  // shortcut
 
         var images = [
-            'logo.png', 'prizes.png', 'missing.png',
+            'logo.png', 'prizes.png', 'missing.png', 'next.png', 'more.png',
             'speaker_on.png', 'speaker_off.png',
             'cat_phys.jpg', 'cat_chem.jpg', 'cat_math.jpg',
             'cat_bio.jpg', 'cat_astro.jpg', 'cat_tech.jpg',
@@ -165,10 +165,10 @@ function has_new_category(fields) {
 var state_intro = {
     create: function() {
         var gg = game.global;  // shortcut
-        game.stage.backgroundColor = gg.color['background'];
+        game.stage.backgroundColor = gg.color.background;
         var name = prompt('\n¡Hola!\n\n¿Cómo te llamas?\n', get_default_name());
         gg.name = name.slice(0, 16) || 'persona anónima';
-        game.state.start('pretutorial');
+        game.state.start('menu');
     }
 };
 
@@ -242,7 +242,7 @@ var state_menu = {
 
 
 function add_menu_background() {
-    game.stage.backgroundColor = game.global.color['background'];
+    game.stage.backgroundColor = game.global.color.background;
 }
 
 
@@ -333,6 +333,8 @@ function load_images() {
 var state_play = {
     time0: 0,
     bar_time: {},
+    buttons: [],
+    right_answer: -1,
     create: function() {
         add_play_background();
         add_play_header();
@@ -369,6 +371,13 @@ var state_play = {
                 '¡Ánimo!', 'El tiempo vuela, ¿eh?']);
             score_and_teach(0, game.add.audio('nope', 0.1), text, '')();
         }
+    },
+    show_correct: function() {
+        for (var i = 0; i < this.buttons.length; i++) {
+            this.buttons[i].children[1].inputEnabled = false;
+            if (i != this.right_answer)
+                this.buttons[i].alpha = 0.2;
+        }
     }
 };
 
@@ -400,6 +409,8 @@ function give_prize() {
 
 
 function add_dino_talk(text) {
+    var group = game.add.group();
+
     var bubble = game.add.graphics(0, 0);
     bubble.beginFill(0xffffff, 1);
     var qtext = add_label(game.world.centerX, 0, text);
@@ -417,6 +428,15 @@ function add_dino_talk(text) {
     line.quadraticCurveTo(qtext.x, game.world.height - 150,
                           qtext.x, qtext.y + qtext.height + 20);
 
+    group.addMultiple([bubble, qtext, line]);
+    var [w, h] = [group.width, group.height];
+    group.width /= 10;
+    group.height /= 10;
+    group.x = 200;
+    group.y = game.world.height - 200;
+    game.add.tween(group).to({width: w, height: h, x: 0, y: 0},
+                             400, null, true, 0, 0);
+
     return qtext;
 }
 
@@ -425,6 +445,7 @@ function add_answers(y, answers, comments, image) {
     var audio_yes = game.add.audio('yes', 0.1);
     var audio_nope = game.add.audio('nope', 0.1);
     reorder = shuffle(answers.length);
+    state_play.buttons = [];
     var delay_ms = 50;
     for (var i = 0; i < answers.length; i++) {
         var j = reorder[i];
@@ -432,20 +453,23 @@ function add_answers(y, answers, comments, image) {
         var points = (j === 0 ? 100 : -10);  // the 1st answer is the right one
         var audio = (j === 0 ? audio_yes : audio_nope);
 
+        if (j === 0)
+            state_play.right_answer = i;
+
         var color = game.global.color[game.global.current_category];
-        var button = add_button(color, y, answers[j],
+        state_play.buttons.push(add_button(color, y, answers[j],
                                 score_and_teach(points, audio,
                                                 comments[j], image),
-                                delay_ms);
+                                delay_ms));
         delay_ms += 50;
-        y += button.height + 50;
+        y += state_play.buttons[i].height + 50;
     }
 }
 
 
 function add_bar_time() {
     var bar_time = game.add.graphics(0, 200);
-    bar_time.beginFill(0x00ff00, 1);
+    bar_time.beginFill(game.global.color.bar, 1);
     bar_time.lineStyle(2, 0x000000, 0.8);
     bar_time.drawRect(game.world.width - 40, 0, 30, game.world.height);
     bar_time.endFill();
@@ -490,28 +514,41 @@ function score_and_teach(points, audio, txt, image) {
         var i = gg.selected_questions[gg.current_question];
         gg.results[gg.current_category].push([i, points]);
 
-        var bg = add_play_background();
-        bg.inputEnabled = true;
-        bg.events.onInputDown.add(() => game.state.start('play'));
+        add_play_header();
+        state_play.show_correct();
 
-        var y_text = 50;
-        if (image) {
-            if (image.startsWith('http'))
-                image = 'missing';
-            var sprite = game.add.sprite(0, 0, image);
-            maximize(sprite);
-            y_text += sprite.y + sprite.height;
-        }
-
-        var text = game.add.text(
-            game.world.centerX, y_text, txt,
-            {fontSize: '32px', fill:'black', align: 'center',
-             wordWrap: true, wordWrapWidth: 600});
-        text.setShadow(0, 0, 'rgba(1, 1, 1, 0.3)', 10);
-        text.anchor.setTo(0.5, 0);
-
+        game.time.events.add(5000, () => game.state.start('play'), this);
+        var more = game.add.button(350, game.world.height - 120, 'more',
+                                   () => { game.time.events.events = [];
+                                           teach(txt, image); });
+        var next = game.add.button(500, game.world.height - 150, 'next',
+                                   () =>  { game.time.events.events = [];
+                                            game.state.start('play'); });
         show_earnings(points);  // after the others so it's not covered
-    };
+    }
+}
+
+
+function teach(txt, image) {
+    var bg = add_play_background();
+    bg.inputEnabled = true;
+    bg.events.onInputDown.add(() => game.state.start('play'));
+
+    var y_text = 50;
+    if (image) {
+        if (image.startsWith('http'))
+            image = 'missing';
+        var sprite = game.add.sprite(0, 0, image);
+        maximize(sprite);
+        y_text += sprite.y + sprite.height;
+    }
+
+    var text = game.add.text(
+        game.world.centerX, y_text, txt,
+        {fontSize: '32px', fill:'black', align: 'center',
+         wordWrap: true, wordWrapWidth: 600});
+    text.setShadow(0, 0, 'rgba(1, 1, 1, 0.3)', 10);
+    text.anchor.setTo(0.5, 0);
 }
 
 
@@ -531,7 +568,7 @@ function choose_question() {
 
 var state_prizes = {
     create: function() {
-        game.stage.backgroundColor = game.global.color['background'];
+        game.stage.backgroundColor = game.global.color.background;
 
         function next(x, y) {
             if (x > game.world.centerX)
@@ -600,7 +637,7 @@ function add_prize(x, y, category) {
 
 var state_final = {
     create: function() {
-        game.stage.backgroundColor = game.global.color['background'];
+        game.stage.backgroundColor = game.global.color.background;
 
         function add_text(y, txt) {
             var text = game.add.bitmapText(game.world.centerX, y, 'desyrel',
@@ -633,7 +670,7 @@ function add_header_background() {
     var graphics = game.add.graphics();
     graphics.beginFill(0x000000, 0.8);
     graphics.drawRect(0, 0, game.world.width, 140);
-    graphics.beginFill(0xd0d0d0, 1);
+    graphics.beginFill(game.global.color.header, 1);
     graphics.drawRect(0, 0, game.world.width, 130);
     graphics.endFill();
 }
