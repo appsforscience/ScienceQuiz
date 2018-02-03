@@ -54,6 +54,12 @@ Las imágenes grandes se pueden convertir a un tamaño razonable con::
 
   convert -resize 400 img_big.jpg img.jpg
 
+Compilación para Android con Cordova Cli
+-----------------------------------------
+
+Ahora en pruebas. 
+
+¡Importante! Las apk "unsigned" dan error de "archivo corrupto" si se intentan instalar. Hay varias formas de firmarla, la más sencilla con diferencia es siguiendo las instrucciones en: https://haensel.pro/cordova-create-a-signed-release-apk-easy-howto/
 
 Compilación para Android con Cocoon
 -----------------------------------
