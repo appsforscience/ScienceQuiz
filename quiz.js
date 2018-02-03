@@ -365,7 +365,7 @@ var state_play = {
             bar_time.height = 0.83 * game.world.height * fraction;
             bar_time.y = 200 + 0.83 * game.world.height * (1 - fraction);
         }
-        else if (fraction < -0.02) {
+        else if (fraction < -0.01) {
             var text = game.rnd.pick([
                 '¡Más rápido!', '¿Problemas con el tiempo?',
                 '¡Ánimo!', 'El tiempo vuela, ¿eh?']);
