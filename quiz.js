@@ -695,9 +695,13 @@ var state_final = {
         var brag = 'He completado ScienceQuiz y conseguido ' +
             game.global.score + ' puntos!'.replace(/ /g, '%20');
         var tweet = 'https://twitter.com/intent/tweet?text=' + brag;
-        add_button(game.global.color.default, 700, 'Compartir en twitter',
+        var score = 'https://metamagical.org/sciencequiz/add?name=' +
+            encodeURIComponent(game.global.name) + '&score=' + game.global.score;
+        add_button(game.global.color.default, 700, 'Subir puntuación a la web',
+                   () => window.open(score, '_blank'));
+        add_button(game.global.color.default, 875, 'Compartir en twitter',
                    () => window.open(tweet, '_blank'));
-        add_button(game.global.color.default, 850, 'Volver a jugar',
+        add_button(game.global.color.default, 1050, 'Volver a jugar',
                    () => { global_reset(); game.state.start('menu'); });
 
         emit_medals();
