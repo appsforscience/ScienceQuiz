@@ -16,9 +16,6 @@ var state_load = {
             'speaker_on.png', 'speaker_off.png',
             'cat_phys.jpg', 'cat_chem.jpg', 'cat_math.jpg',
             'cat_bio.jpg', 'cat_astro.jpg', 'cat_tech.jpg',
-            'Premio_Fisica.png', 'Premio_Historia.png', 'Premio_Mates.png',
-            'Premio_Naturales.png', 'Premio_Astronomia.png',
-            'Premio_Informatica.png',
             'Premio_tecno1.png', 'Premio_tecno2.png', 'Premio_tecno3.png',
             'Premio_quim1.png', 'Premio_quim2.png', 'Premio_quim3.png',
             'Premio_natu1.png', 'Premio_natu2.png', 'Premio_natu3.png',
@@ -347,7 +344,7 @@ var state_play = {
     right_answer: -1,
     create: function() {
         add_play_background();
-        add_play_header();
+        add_play_header(true);
         add_dino();
 
         game.global.ticking = true;
@@ -511,6 +508,23 @@ function add_play_background() {
 }
 
 
+function add_play_header(progress) {
+    add_header_background();
+    add_home_button();
+    add_score();
+    add_sound_button();
+    if (progress)
+        add_progress();
+}
+
+
+function add_progress() {
+    var gg = game.global;  // shortcut
+    var text = '' + (gg.current_question + 1) + ' / ' + gg.selected_questions.length;
+    game.add.bitmapText(160, 28, 'desyrel', text, 50);
+}
+
+
 // Increase the global score and show a text and image.
 function score_and_teach(points, audio, txt, image) {
     return () => {
@@ -524,9 +538,9 @@ function score_and_teach(points, audio, txt, image) {
 
         // Add points to the result of this question.
         if (Object.keys(gg.results).indexOf(gg.current_category) === -1)
-            gg.results[gg.current_category] = [];
+            gg.results[gg.current_category] = [gg.selected_questions.slice(), []]
         var i = gg.selected_questions[gg.current_question];
-        gg.results[gg.current_category].push([i, points]);
+        gg.results[gg.current_category][1].push(points);
 
         add_play_header();
         state_play.show_correct();
@@ -616,10 +630,10 @@ function result_goodness(category) {
         return 4;
     var res = gg.results[category];
     var total_right = 0;
-    for (var i = 0; i < res.length; i++)
-        if (res[i][1] > 0)
+    for (var i = 0; i < res[1].length; i++)
+        if (res[1][i] > 0)
             total_right++;
-    var right = total_right / res.length;
+    var right = total_right / res[0].length;
     if (right >= 5/5)
         return 1;
     if (right >= 4/5)
@@ -743,14 +757,6 @@ function add_header_background() {
     graphics.beginFill(game.global.color.header, 1);
     graphics.drawRect(0, 0, game.world.width, 130);
     graphics.endFill();
-}
-
-
-function add_play_header() {
-    add_header_background();
-    add_home_button();
-    add_score();
-    add_sound_button();
 }
 
 
