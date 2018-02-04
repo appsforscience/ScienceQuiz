@@ -12,19 +12,28 @@ var state_load = {
         var gl = game.load;  // shortcut
 
         var images = [
-            'logo.png', 'prizes.png', 'missing.png', 'next.png', 'more.png',
+            'logo.png', 'prizes.png', 'missing.png',
             'speaker_on.png', 'speaker_off.png',
             'cat_phys.jpg', 'cat_chem.jpg', 'cat_math.jpg',
             'cat_bio.jpg', 'cat_astro.jpg', 'cat_tech.jpg',
             'Premio_Fisica.png', 'Premio_Historia.png', 'Premio_Mates.png',
             'Premio_Naturales.png', 'Premio_Astronomia.png',
-            'Premio_Informatica.png'];
+            'Premio_Informatica.png',
+            'Premio_tecno1.png', 'Premio_tecno2.png', 'Premio_tecno3.png',
+            'Premio_quim1.png', 'Premio_quim2.png', 'Premio_quim3.png',
+            'Premio_natu1.png', 'Premio_natu2.png', 'Premio_natu3.png',
+            'Premio_mates1.png', 'Premio_mates2.png', 'Premio_mates3.png',
+            'Premio_fisica1.png', 'Premio_fisica2.png', 'Premio_fisica3.png',
+            'Premio_astro1.png', 'Premio_astro2.png', 'Premio_astro3.png',
+        ];
         for (var i = 0; i < images.length; i++)
             gl.image(images[i].slice(0, -4), 'assets/' + images[i]);
 
         gl.spritesheet('dino', 'assets/dino.png', 200, 217, 3);
         gl.spritesheet('dino_yes', 'assets/dino_yes.png', 200, 228, 3);
         gl.spritesheet('home', 'assets/home_button.png', 60, 49);
+        gl.spritesheet('next', 'assets/next.png', 100, 115);
+        gl.spritesheet('more', 'assets/more.png', 100, 182);
 
         gl.audio('yes', 'assets/p-ping.mp3');
         gl.audio('nope', 'assets/explosion.mp3');
@@ -116,22 +125,8 @@ function parse_questions(text) {
         }
         else {
             img = fields[7];
-            if (img && img.startsWith('http')) {
-                img = img.split('/').slice(-1)[0]
-                img = img.replace('%20', ' ');
-                img = img.replace('%21', '!');
-                img = img.replace('%22', '"');
-                img = img.replace('%23', '#');
-                img = img.replace('%24', '$');
-                img = img.replace('%25', '%');
-                img = img.replace('%26', '&');
-                img = img.replace('%27', "'");
-                img = img.replace('%28', '(');
-                img = img.replace('%29', ')');
-                img = img.replace('%2C', ',');
-                img = img.replace('%C2%A9', '©');
-                img = img.replace('%C3%B1', 'ñ');
-            }
+            if (img && img.startsWith('http'))
+                img = get_url_fname(img);
 
             current_questions.push({question: fields[0],
                                     answers: fields.slice(1, 4),
@@ -143,6 +138,21 @@ function parse_questions(text) {
         questions[category] = current_questions; // save previous questions
 
     return questions;
+}
+
+
+// Return the file name from a url, unencoded.
+function get_url_fname(url) {
+    fname = img.split('/').slice(-1)[0];
+    substitutions = [
+        ['%20', ' '], ['%21', '!'], ['%22', '"'], ['%23', '#'], ['%24', '$'],
+        ['%25', '%'], ['%26', '&'], ['%27', "'"], ['%28', '['], ['%29', ']'],
+        ['%2C', ','], ['%C2%A9', '©'], ['%C3%B1', 'ñ']];
+    for (var i = 0; i < substitutions.length; i++) {
+        var [x, y] = substitutions[i];
+        fname = fname.replace(x, y)
+    }
+    return fname;
 }
 
 
@@ -388,10 +398,11 @@ function give_prize() {
     bg.inputEnabled = true;
     bg.events.onInputDown.add(() => game.state.start('menu'));
     var medal = add_medal(game.world.centerX, game.world.centerY - 100,
-                          game.global.current_category);
+                          game.global.current_category,
+                          result_goodness(game.global.current_category));
     medal.alpha = 0.2;
     maximize(medal);
-    if (is_good_result(game.global.current_category)) {
+    if (result_goodness(game.global.current_category) <= 3) {
         add_dino('yes');
         add_dino_talk(game.rnd.pick([
             '¡Genial!', '¡Bravo!', '¡Estupendo!', '¡Qué guay!']));
@@ -408,6 +419,7 @@ function give_prize() {
 }
 
 
+// Add bubble with the text that dino is saying.
 function add_dino_talk(text) {
     var group = game.add.group();
 
@@ -467,6 +479,7 @@ function add_answers(y, answers, comments, image) {
 }
 
 
+// Add timer in the form of a bar that will shorten.
 function add_bar_time() {
     var bar_time = game.add.graphics(0, 200);
     bar_time.beginFill(game.global.color.bar, 1);
@@ -477,6 +490,7 @@ function add_bar_time() {
 }
 
 
+// Add background image for the current category.
 function add_play_background() {
     var graphics = game.add.graphics();
     graphics.beginFill(0xffffff, 1);
@@ -518,17 +532,23 @@ function score_and_teach(points, audio, txt, image) {
         state_play.show_correct();
 
         game.time.events.add(5000, () => game.state.start('play'), this);
-        var more = game.add.button(350, game.world.height - 120, 'more',
+        var more = game.add.button(-100, 400, 'more',
                                    () => { game.time.events.events = [];
-                                           teach(txt, image); });
-        var next = game.add.button(500, game.world.height - 150, 'next',
+                                           teach(txt, image); },
+                                   this, 1, 0, 2);
+        var next = game.add.button(-100, 700, 'next',
                                    () =>  { game.time.events.events = [];
-                                            game.state.start('play'); });
+                                            game.state.start('play'); },
+                                   this, 1, 0, 2);
+        game.add.tween(more).to({x: 10}, 200, null, true, 0, 0);
+        game.add.tween(next).to({x: 20}, 200, null, true, 0, 0);
         show_earnings(points);  // after the others so it's not covered
     }
 }
 
 
+// Show a screen with an image and a caption text. Whenever anything is
+// touched it goes to the "Play" state. Normally used to teach about a subject.
 function teach(txt, image) {
     var bg = add_play_background();
     bg.inputEnabled = true;
@@ -579,9 +599,7 @@ var state_prizes = {
 
         var [x, y] = [game.world.centerX / 2, 200];
         for (var category in game.global.questions) {
-            var prize = add_prize(x, y, category);
-            if (!is_good_result(category))
-                prize.alpha = 0.2;
+            var prize = add_prize(x, y, category, result_goodness(category));
             [x, y] = next(x, y);
         }
 
@@ -591,37 +609,48 @@ var state_prizes = {
 };
 
 
-function is_good_result(category) {
+// Return 1 if gold-like, 2 silver-like, 3 for bronze-like and 4 for no prize.
+function result_goodness(category) {
     var gg = game.global;  // shortcut
     if (Object.keys(gg.results).indexOf(category) === -1)
-        return false;
+        return 4;
     var res = gg.results[category];
     var total_right = 0;
     for (var i = 0; i < res.length; i++)
         if (res[i][1] > 0)
             total_right++;
-    return total_right / res.length > 0.5;
+    var right = total_right / res.length;
+    if (right >= 5/5)
+        return 1;
+    if (right >= 4/5)
+        return 2;
+    if (right >= 3/5)
+        return 3;
+    return 4;
 }
 
 
-function add_medal(x, y, category) {
+function add_medal(x, y, category, goodness) {
     var image = {
-        'Astronomía': 'Premio_Astronomia',
-        'Física': 'Premio_Fisica',
-        'Química': 'Premio_Historia',
-        'Tecnología': 'Premio_Informatica',
-        'Matemáticas': 'Premio_Mates',
-        'Ciencias Naturales': 'Premio_Naturales'}[category] || 'Premio_Mates';
+        'Astronomía': 'Premio_astro',
+        'Física': 'Premio_fisica',
+        'Química': 'Premio_quim',
+        'Tecnología': 'Premio_tecno',
+        'Matemáticas': 'Premio_mates',
+        'Ciencias Naturales': 'Premio_natu'}[category];
+    image += (goodness <= 3) ? goodness : 3;
     var medal = game.add.sprite(x, y, image);
+    if (goodness > 3)
+        medal.alpha = 0.2;
     medal.anchor.set(0.5);
     return medal;
 }
 
 
 // Add an image with the prize that corresponds to a category and its name.
-function add_prize(x, y, category) {
+function add_prize(x, y, category, goodness) {
     var group = game.add.group();
-    var prize = add_medal(x, y, category);
+    var prize = add_medal(x, y, category, goodness);
     prize.scale.set(0.35);
     var text = add_label(x, prize.y + prize.height / 2 + 10, category);
     group.addMultiple([prize, text]);
@@ -656,8 +685,49 @@ var state_final = {
                    () => window.open(tweet, '_blank'));
         add_button(game.global.color.default, 850, 'Volver a jugar',
                    () => { global_reset(); game.state.start('menu'); });
+
+        emit_medals();
     }
 };
+
+
+function emit_medals() {
+    function next(x, y) {
+        if (x > game.world.centerX)
+            return [game.world.centerX / 2, y + 300];
+        else
+            return [3 * game.world.centerX / 2, y];
+    }
+
+    var [x, y] = [game.world.centerX / 2, 200];
+    for (var category in game.global.questions) {
+        make_particles(x, y, category, result_goodness(category));
+        [x, y] = next(x, y);
+    }
+}
+
+
+function make_particles(x, y, category, goodness) {
+    var emitter = game.add.emitter(x, y, 10);
+
+    var image = {
+        'Astronomía': 'Premio_astro',
+        'Física': 'Premio_fisica',
+        'Química': 'Premio_quim',
+        'Tecnología': 'Premio_tecno',
+        'Matemáticas': 'Premio_mates',
+        'Ciencias Naturales': 'Premio_natu'}[category];
+    image += (goodness <= 3) ? goodness : 3;
+    emitter.makeParticles(image);
+    if (goodness > 3)
+        emitter.setAlpha(0.2, 0.2);
+
+    emitter.setRotation(0, 0);
+    emitter.setScale(0.2, 0.5, 0.2, 0.5);
+    emitter.gravity = 200;
+
+    emitter.start(false, 5000, 100, 10);
+}
 
 
 //  ************************************************************************

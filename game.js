@@ -1,18 +1,19 @@
-// Prototype for ScienceQuiz, the quiz game!
+// ScienceQuiz, the quiz game!
 
 var game = new Phaser.Game(720, 1280, Phaser.AUTO, 'game');
 
 game.global = {
-    name: '',
-    score: 0,
-    points_extra: 0,
-    questions: {},
-    results: {},
+    name: '',  // player's name
+    score: 0,  // current score
+    points_extra: 0,  // extra points to add to a correct answer
+    questions: {},  // {category: [{question: q, answers: [a1, a2, a3],
+                    //              comments: [c1, c2, c3], image: i}, ...], ...}
+    results: {},  // {category: [question_index, points_won], ...}
     current_category: '',
-    selected_questions: [],
+    selected_questions: [],  // indices of questions for the current category
     current_question: 0,
-    ticking: false,
-    color: {
+    ticking: false,  // is the clock ticking for the remaining time bar?
+    color: {  // our palette
         'default': 0xaeaeae,
         'background': 0xd0d0d0,
         'header': 0x83de83,
