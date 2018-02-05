@@ -69,6 +69,14 @@ Cambios previos a la complilación necesarios en los archivos:
 
 Añadir "<script type="text/javascript" src="cordova.js"></script>" en index.html
 
+También: 
+
+"document.addEventListener("deviceready", onDeviceReady, false);
+    
+    function onDeviceReady() {
+      var game = new Phaser.Game(800, 600, Phaser.AUTO, '', { preload: preload, create: create, update: update });
+    }
+
 Para compilar la apk: 
 
 Vamos al directorio ("cd sciencequiz")
@@ -80,6 +88,7 @@ Creamos la apk ("cordova build android --release")
 Done!
 
 Tal vez sea interesante usar el template: https://github.com/amex4152/cordova-phaser
+
 
 (¡Importante! Las apk "unsigned" dan error de "archivo corrupto" si se intentan instalar. Hay varias formas de firmarla, la más sencilla con diferencia es siguiendo las instrucciones en: https://haensel.pro/cordova-create-a-signed-release-apk-easy-howto/)
 
