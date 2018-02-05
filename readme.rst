@@ -79,6 +79,8 @@ Creamos la apk ("cordova build android --release")
 
 Done!
 
+Tal vez sea interesante usar el template: https://github.com/amex4152/cordova-phaser
+
 (¡Importante! Las apk "unsigned" dan error de "archivo corrupto" si se intentan instalar. Hay varias formas de firmarla, la más sencilla con diferencia es siguiendo las instrucciones en: https://haensel.pro/cordova-create-a-signed-release-apk-easy-howto/)
 
 Compilación para Android con Cocoon
