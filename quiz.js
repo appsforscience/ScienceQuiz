@@ -15,13 +15,13 @@ var state_load = {
             'logo.png', 'prizes.png', 'missing.png',
             'speaker_on.png', 'speaker_off.png',
             'cat_phys.jpg', 'cat_chem.jpg', 'cat_math.jpg',
-            'cat_bio.jpg', 'cat_astro.jpg', 'cat_tech.jpg',
+            'cat_bio.jpg', 'cat_med.jpg', 'cat_tech.jpg',
             'Premio_tecno1.png', 'Premio_tecno2.png', 'Premio_tecno3.png',
             'Premio_quim1.png', 'Premio_quim2.png', 'Premio_quim3.png',
             'Premio_natu1.png', 'Premio_natu2.png', 'Premio_natu3.png',
             'Premio_mates1.png', 'Premio_mates2.png', 'Premio_mates3.png',
             'Premio_fisica1.png', 'Premio_fisica2.png', 'Premio_fisica3.png',
-            'Premio_astro1.png', 'Premio_astro2.png', 'Premio_astro3.png',
+            'Premio_medicina1.png', 'Premio_medicina2.png', 'Premio_medicina3.png',
         ];
         for (var i = 0; i < images.length; i++)
             gl.image(images[i].slice(0, -4), 'assets/' + images[i]);
@@ -465,7 +465,7 @@ function add_play_background() {
         'Química': 'cat_chem',
         'Matemáticas': 'cat_math',
         'Ciencias Naturales': 'cat_bio',
-        'Medicina': 'cat_astro',
+        'Medicina': 'cat_med',
         'Tecnología': 'cat_tech'}[game.global.current_category];
     var bg = game.add.sprite(game.world.centerX, game.world.centerY, bg_img);
     maximize(bg, true);
@@ -621,7 +621,7 @@ function result_goodness(category) {
 
 function add_medal(x, y, category, goodness) {
     var image = {
-        'Medicina': 'Premio_astro',
+        'Medicina': 'Premio_medicina',
         'Física': 'Premio_fisica',
         'Química': 'Premio_quim',
         'Tecnología': 'Premio_tecno',
@@ -703,7 +703,7 @@ function make_particles(x, y, category, goodness) {
     var emitter = game.add.emitter(x, y, 10);
 
     var image = {
-        'Medicina': 'Premio_astro',
+        'Medicina': 'Premio_medicina',
         'Física': 'Premio_fisica',
         'Química': 'Premio_quim',
         'Tecnología': 'Premio_tecno',
