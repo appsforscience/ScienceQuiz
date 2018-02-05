@@ -465,7 +465,7 @@ function add_play_background() {
         'Química': 'cat_chem',
         'Matemáticas': 'cat_math',
         'Ciencias Naturales': 'cat_bio',
-        'Astronomía': 'cat_astro',
+        'Medicina': 'cat_astro',
         'Tecnología': 'cat_tech'}[game.global.current_category];
     var bg = game.add.sprite(game.world.centerX, game.world.centerY, bg_img);
     maximize(bg, true);
@@ -621,7 +621,7 @@ function result_goodness(category) {
 
 function add_medal(x, y, category, goodness) {
     var image = {
-        'Astronomía': 'Premio_astro',
+        'Medicina': 'Premio_astro',
         'Física': 'Premio_fisica',
         'Química': 'Premio_quim',
         'Tecnología': 'Premio_tecno',
@@ -703,7 +703,7 @@ function make_particles(x, y, category, goodness) {
     var emitter = game.add.emitter(x, y, 10);
 
     var image = {
-        'Astronomía': 'Premio_astro',
+        'Medicina': 'Premio_astro',
         'Física': 'Premio_fisica',
         'Química': 'Premio_quim',
         'Tecnología': 'Premio_tecno',
@@ -821,9 +821,8 @@ function add_sound_button() {
 
 // Add prizes button.
 function add_prizes_button() {
-    var img = game.add.sprite(60, 40, 'prizes');
+    var img = game.add.sprite(60, 30, 'prizes');
 
-    img.scale.set(1.2);
     img.inputEnabled = true;
     img.input.useHandCursor = true;
     img.events.onInputDown.add(() => game.state.start('prizes'));

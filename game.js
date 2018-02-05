@@ -23,7 +23,7 @@ game.global = {
         'Física': 0xf38181,
         'Ciencias Naturales': 0xdde9af,
         'Tecnología': 0xe3d7f4,
-        'Astronomía': 0xd5f6ff },
+        'Medicina': 0xd5f6ff },
 };
 
 function global_reset() {
