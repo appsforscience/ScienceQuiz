@@ -29,8 +29,8 @@ var state_load = {
         gl.spritesheet('dino', 'assets/dino.png', 200, 217, 3);
         gl.spritesheet('dino_yes', 'assets/dino_yes.png', 200, 228, 3);
         gl.spritesheet('home', 'assets/home_button.png', 60, 49);
-        gl.spritesheet('next', 'assets/next.png', 100, 115);
-        gl.spritesheet('more', 'assets/more.png', 100, 182);
+        gl.spritesheet('next', 'assets/next.png', 100, 100);
+        gl.spritesheet('more', 'assets/more.png', 100, 100);
 
         gl.audio('yes', 'assets/p-ping.mp3');
         gl.audio('nope', 'assets/explosion.mp3');
@@ -38,7 +38,6 @@ var state_load = {
         gl.audio('menu', 'assets/menu_select.mp3');
         gl.audio('disabled', 'assets/steps2.mp3');
 
-        gl.bitmapFont('desyrel', 'assets/desyrel.png', 'assets/desyrel.xml');
         gl.bitmapFont('inversionz', 'assets/inversionz.png',
                       'assets/inversionz.xml');
         // inversionz from https://www.dafont.com/inversionz.font
@@ -174,7 +173,7 @@ var state_intro = {
         var gg = game.global;  // shortcut
         game.stage.backgroundColor = gg.color.background;
         var name = prompt('\n¡Hola!\n\n¿Cómo te llamas?\n', get_default_name());
-        gg.name = name.slice(0, 16) || 'persona anónima';
+        gg.name = name ? name.slice(0, 16) : 'persona anónima';
         game.state.start('menu');
     }
 };
@@ -234,8 +233,7 @@ var state_tutorial = {
 
 var state_menu = {
     create: function() {
-        var gg = game.global;  // shortcut
-        if (Object.keys(gg.results).length < Object.keys(gg.questions).length) {
+        if (!all_done()) {
             add_menu_background();
             add_menu_header();
             add_category_buttons();
@@ -246,6 +244,17 @@ var state_menu = {
         }
     }
 };
+
+
+// Return true only if all questions in all categories have been done.
+function all_done() {
+    var gg = game.global;  // shortcut
+    for (category in gg.questions)
+        if (Object.keys(gg.results).indexOf(category) === -1 ||
+            gg.results[category][1].length < gg.results[category][0].length)
+            return false;
+    return true;
+}
 
 
 function add_menu_background() {
@@ -261,31 +270,14 @@ function add_menu_header() {
 }
 
 
-function add_dino(action) {
-    var name = '';
-    var sequence = [];
-    if (action === undefined) {
-        name = 'dino';
-        sequence = [0, 0, 2, 2, 0, 0, 2, 0, 2, 2, 0, 0, 1];
-    }
-    else if (action === 'yes') {
-        name = 'dino_yes';
-        sequence = [0, 1, 0, 2];
-    }
-    var puppy = game.add.sprite(0, 0, name);
-    puppy.y = game.world.height - puppy.height;
-    puppy.animations.add('animation', sequence)
-    puppy.animations.play('animation', 5, true);
-}
-
-
 function add_category_buttons() {
     var y = 250;
     var delay_ms = 50;
     var gg = game.global;  // shortcut
     for (var category in gg.questions) {
         var element = {};
-        if (Object.keys(gg.results).indexOf(category) === -1) {
+        if (Object.keys(gg.results).indexOf(category) === -1 ||
+            gg.results[category][1].length < gg.results[category][0].length) {
             element = add_button(gg.color[category] || gg.color.default,
                                  y, category,
                                  set_category_and_play(category), delay_ms);
@@ -305,13 +297,21 @@ function set_category_and_play(category, n_questions) {
     return () => {
         var gg = game.global;  // shortcut
         gg.current_category = category;
-        if (n_questions === undefined)
-            n_questions = gg.questions[category].length;
-        gg.selected_questions = shuffle(n_questions)
-        if (n_questions > 5)
-            gg.selected_questions = gg.selected_questions.slice(0, 5);
-        load_images();
-        gg.current_question = 0;
+
+        if (Object.keys(gg.results).indexOf(category) != -1) {
+            gg.selected_questions = gg.results[category][0];
+            gg.current_question = gg.results[category][1].length;
+        }
+        else {
+            if (n_questions === undefined)
+                n_questions = gg.questions[category].length;
+            gg.selected_questions = shuffle(n_questions)
+            if (n_questions > 5)
+                gg.selected_questions = gg.selected_questions.slice(0, 5);
+            load_images();
+            gg.current_question = 0;
+        }
+
         if (!game.sound.noAudio)
             game.add.audio('menu', 0.05).play();
         game.state.start('play');
@@ -344,7 +344,8 @@ var state_play = {
     right_answer: -1,
     create: function() {
         add_play_background();
-        add_play_header(true);
+        add_play_header();
+        add_progress();
         add_dino();
 
         game.global.ticking = true;
@@ -416,40 +417,6 @@ function give_prize() {
 }
 
 
-// Add bubble with the text that dino is saying.
-function add_dino_talk(text) {
-    var group = game.add.group();
-
-    var bubble = game.add.graphics(0, 0);
-    bubble.beginFill(0xffffff, 1);
-    var qtext = add_label(game.world.centerX, 0, text);
-    qtext.y = game.world.height - qtext.height - 250;
-    bubble.x = qtext.x - qtext.width / 2 - 30;
-    bubble.y = qtext.y - 10;
-    bubble.lineStyle(4, 0x000000, 0.5);
-    bubble.drawRoundedRect(0, 0, qtext.width + 60, qtext.height + 20, 9);
-    bubble.alpha = 0.9;
-    bubble.endFill();
-
-    var line = game.add.graphics(0, 0);
-    line.lineStyle(4, 0x000000, 0.5);
-    line.moveTo(210, game.world.height - 130);
-    line.quadraticCurveTo(qtext.x, game.world.height - 150,
-                          qtext.x, qtext.y + qtext.height + 20);
-
-    group.addMultiple([bubble, qtext, line]);
-    var [w, h] = [group.width, group.height];
-    group.width /= 10;
-    group.height /= 10;
-    group.x = 200;
-    group.y = game.world.height - 200;
-    game.add.tween(group).to({width: w, height: h, x: 0, y: 0},
-                             400, null, true, 0, 0);
-
-    return qtext;
-}
-
-
 function add_answers(y, answers, comments, image) {
     var audio_yes = game.add.audio('yes', 0.1);
     var audio_nope = game.add.audio('nope', 0.1);
@@ -508,20 +475,18 @@ function add_play_background() {
 }
 
 
-function add_play_header(progress) {
+function add_play_header() {
     add_header_background();
     add_home_button();
     add_score();
     add_sound_button();
-    if (progress)
-        add_progress();
 }
 
 
 function add_progress() {
     var gg = game.global;  // shortcut
     var text = '' + (gg.current_question + 1) + ' / ' + gg.selected_questions.length;
-    game.add.bitmapText(160, 28, 'desyrel', text, 50);
+    add_label(game.world.width - 200, game.world.height - 100, text);
 }
 
 
@@ -546,16 +511,26 @@ function score_and_teach(points, audio, txt, image) {
         state_play.show_correct();
 
         game.time.events.add(5000, () => game.state.start('play'), this);
-        var more = game.add.button(-100, 400, 'more',
+
+        var group = game.add.group();
+        var graphics_bg = game.add.graphics();
+        graphics_bg.beginFill(0x000000, 1);
+        graphics_bg.drawRoundedRect(-140, 360, 150, 400, 8);
+        graphics_bg.endFill();
+        var graphics = game.add.graphics();
+        graphics.beginFill(gg.color.header, 1);
+        graphics.drawRoundedRect(-150, 350, 150, 400, 8);
+        graphics.endFill();
+        var more = game.add.button(-110, 420, 'more',
                                    () => { game.time.events.events = [];
                                            teach(txt, image); },
                                    this, 1, 0, 2);
-        var next = game.add.button(-100, 700, 'next',
+        var next = game.add.button(-110, 600, 'next',
                                    () =>  { game.time.events.events = [];
                                             game.state.start('play'); },
                                    this, 1, 0, 2);
-        game.add.tween(more).to({x: 10}, 200, null, true, 0, 0);
-        game.add.tween(next).to({x: 20}, 200, null, true, 0, 0);
+        group.addMultiple([graphics_bg, graphics, more, next]);
+        game.add.tween(group).to({x: 110}, 200, null, true, 0, 0);
         show_earnings(points);  // after the others so it's not covered
     }
 }
@@ -683,13 +658,12 @@ var state_final = {
         game.stage.backgroundColor = game.global.color.background;
 
         function add_text(y, txt) {
-            var text = game.add.bitmapText(game.world.centerX, y, 'desyrel',
-                                           txt, 80);
+            var text = add_label(game.world.centerX, y, txt);
             text.align = 'center';
             text.anchor.set(0.5);
         }
 
-        add_text(200, 'Enhorabuena\n' + game.global.name + '!!!');
+        add_text(200, '¡¡¡Enhorabuena\n' + game.global.name + '!!!');
         add_text(500, 'Total de puntos:\n' + game.global.score);
 
         var brag = 'He completado ScienceQuiz y conseguido ' +
@@ -735,10 +709,11 @@ function make_particles(x, y, category, goodness) {
         'Tecnología': 'Premio_tecno',
         'Matemáticas': 'Premio_mates',
         'Ciencias Naturales': 'Premio_natu'}[category];
-    image += (goodness <= 3) ? goodness : 3;
-    emitter.makeParticles(image);
     if (goodness > 3)
-        emitter.setAlpha(0.2, 0.2);
+        return;
+
+    image += goodness;
+    emitter.makeParticles(image);
 
     emitter.setRotation(0, 0);
     emitter.setScale(0.2, 0.5, 0.2, 0.5);
@@ -753,6 +728,58 @@ function make_particles(x, y, category, goodness) {
 //  *                              Utilities                               *
 //  *                                                                      *
 //  ************************************************************************
+
+function add_dino(action) {
+    var name = '';
+    var sequence = [];
+    if (action === undefined) {
+        name = 'dino';
+        sequence = [0, 0, 2, 2, 0, 0, 2, 0, 2, 2, 0, 0, 1];
+    }
+    else if (action === 'yes') {
+        name = 'dino_yes';
+        sequence = [0, 1, 0, 2];
+    }
+    var puppy = game.add.sprite(0, 0, name);
+    puppy.y = game.world.height - puppy.height;
+    puppy.animations.add('animation', sequence)
+    puppy.animations.play('animation', 5, true);
+}
+
+
+// Add bubble with the text that dino is saying.
+function add_dino_talk(text) {
+    var group = game.add.group();
+
+    var bubble = game.add.graphics(0, 0);
+    bubble.beginFill(0xffffff, 1);
+    var qtext = add_label(game.world.centerX, 0, text);
+    qtext.y = game.world.height - qtext.height - 250;
+    bubble.x = qtext.x - qtext.width / 2 - 30;
+    bubble.y = qtext.y - 10;
+    bubble.lineStyle(4, 0x000000, 0.5);
+    bubble.drawRoundedRect(0, 0, qtext.width + 60, qtext.height + 20, 9);
+    bubble.alpha = 0.9;
+    bubble.endFill();
+
+    var line = game.add.graphics(0, 0);
+    line.lineStyle(4, 0x000000, 0.5);
+    line.moveTo(210, game.world.height - 130);
+    line.quadraticCurveTo(qtext.x, game.world.height - 150,
+                          qtext.x, qtext.y + qtext.height + 20);
+
+    group.addMultiple([bubble, qtext, line]);
+    var [w, h] = [group.width, group.height];
+    group.width /= 10;
+    group.height /= 10;
+    group.x = 200;
+    group.y = game.world.height - 200;
+    game.add.tween(group).to({width: w, height: h, x: 0, y: 0},
+                             400, null, true, 0, 0);
+
+    return qtext;
+}
+
 
 function add_header_background() {
     var graphics = game.add.graphics();
@@ -857,12 +884,12 @@ function add_button(color, y, text, on_click, delay_animation) {
 // Give feedback on the scored points by briefely showing it on screen.
 function show_earnings(points) {
     var gw = game.world;
-    var text = game.add.bitmapText(gw.centerX, gw.centerY, 'desyrel',
-                                   (points >= 0 ? '+' : '') + points, 128);
+    var text = add_label(gw.centerX, gw.centerY,
+                         (points >= 0 ? '+' : '') + points);
     text.anchor.set(0.5);
     game.add.tween(text).to({alpha: 0,
-                             height: 2 * text.height,
-                             width: 2 * text.width}, 1500, null, true);
+                             height: 5 * text.height,
+                             width: 5 * text.width}, 1500, null, true);
 }
 
 

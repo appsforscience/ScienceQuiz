@@ -8,7 +8,7 @@ game.global = {
     points_extra: 0,  // extra points to add to a correct answer
     questions: {},  // {category: [{question: q, answers: [a1, a2, a3],
                     //              comments: [c1, c2, c3], image: i}, ...], ...}
-    results: {},  // {category: [question_index, points_won], ...}
+    results: {},  // {category: [[question_index, ...], [points_won, ...]}
     current_category: '',
     selected_questions: [],  // indices of questions for the current category
     current_question: 0,
