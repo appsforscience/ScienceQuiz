@@ -10,12 +10,21 @@ import subprocess as sp
 
 
 def main():
-    for url in get_urls():
-        fname = url_decode(url.rsplit('/', 1)[-1])
+    download_new_images()
+    resize_all_images()
+    compare_expected_files()
+
+
+def download_new_images():
+    for url in get_contents_urls():
+        fname = get_fname(url)
         if not os.path.exists(fname):
             print('-- Downloading new file:', fname)
             sp.call(['wget', '-nv', url])
 
+
+def resize_all_images():
+    for fname in os.listdir('.'):
         if is_image(fname):
             if get_size(fname)[0] != 300:
                 print('-- Converting to 300px width:', fname)
@@ -26,7 +35,19 @@ def main():
             print('-- Not an image:', fname)
 
 
-def get_urls():
+def compare_expected_files():
+    expected = ({get_fname(url) for url in get_contents_urls()} |
+                set(get_contents_fnames()))
+    existing = set(os.listdir('.')) - {'.', '..', 'get_images.py'}
+    print('-- Expected files that are missing (why?):')
+    for fname in expected - existing:
+        print(' ', fname)
+    print('-- Unexpected existing files (probably legacy, "git rm" them):')
+    for fname in existing - expected:
+        print(' ', fname)
+
+
+def get_contents_urls():
     "Return a list of the urls in contents.tsv"
     urls = []
     for line in open('../../contents.tsv'):
@@ -34,6 +55,23 @@ def get_urls():
         if len(fields) >= 8 and fields[7].startswith('http'):
             urls.append(fields[7].strip())
     return urls
+
+
+def get_contents_fnames():
+    "Return a list of the file names in contents.tsv"
+    exclude = {'Imagen'}
+    fnames = []
+    for line in open('../../contents.tsv'):
+        fields = line.split('\t')
+        if len(fields) >= 8:
+            img = fields[7]
+            if img and not img.startswith('http') and img not in exclude:
+                fnames.append(img)
+    return fnames
+
+
+def get_fname(url):
+    return url_decode(url.rsplit('/', 1)[-1])
 
 
 def url_decode(txt):
