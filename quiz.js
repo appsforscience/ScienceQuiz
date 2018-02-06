@@ -234,6 +234,7 @@ var state_tutorial = {
 var state_menu = {
     create: function() {
         if (!all_done()) {
+            add_debug_button();
             add_menu_background();
             add_menu_header();
             add_category_buttons();
@@ -258,7 +259,10 @@ function all_done() {
 
 
 function add_menu_background() {
-    game.stage.backgroundColor = game.global.color.background;
+    if (!game.global.debug)
+        game.stage.backgroundColor = game.global.color.background;
+    else
+        game.stage.backgroundColor = 0xff0000;
 }
 
 
@@ -298,16 +302,21 @@ function set_category_and_play(category, n_questions) {
         var gg = game.global;  // shortcut
         gg.current_category = category;
 
-        if (Object.keys(gg.results).indexOf(category) != -1) {
+        if (category_started(category)) {
             gg.selected_questions = gg.results[category][0];
             gg.current_question = gg.results[category][1].length;
         }
         else {
             if (n_questions === undefined)
                 n_questions = gg.questions[category].length;
-            gg.selected_questions = shuffle(n_questions)
-            if (n_questions > 5)
-                gg.selected_questions = gg.selected_questions.slice(0, 5);
+            if (gg.debug) {
+                gg.selected_questions = range(n_questions);
+            }
+            else {
+                gg.selected_questions = shuffle(n_questions)
+                if (n_questions > 5)
+                    gg.selected_questions = gg.selected_questions.slice(0, 5);
+            }
             load_images();
             gg.current_question = 0;
         }
@@ -316,6 +325,11 @@ function set_category_and_play(category, n_questions) {
             game.add.audio('menu', 0.05).play();
         game.state.start('play');
     };
+}
+
+
+function category_started(category) {
+    return Object.keys(game.global.results).indexOf(category) != -1;
 }
 
 
@@ -917,7 +931,7 @@ function maximize(img, fill_all) {
 
 // Return range(n) randomly shuffled.
 function shuffle(n) {
-    var a = new Array(n).fill().map((e, i) => i);  // a = range(n)
+    var a = range(n);
     for (var i = 0; i < n; i++) {
         var j = rand(n);
         [a[i], a[j]] = [a[j], a[i]];
@@ -926,7 +940,20 @@ function shuffle(n) {
 }
 
 
+// Like python's range(n).
+function range(n) {
+    return new Array(n).fill().map((e, i) => i);
+}
+
+
 // Return a random number between 0 and n-1.
 function rand(n) {
     return Math.floor(Math.random() * n);
+}
+
+
+function add_debug_button() {
+    add_button(0xff0000, game.world.height - 100, 'DEBUG',
+               () => { game.global.debug = !game.global.debug;
+                       add_menu_background(); });
 }

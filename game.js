@@ -13,6 +13,7 @@ game.global = {
     selected_questions: [],  // indices of questions for the current category
     current_question: 0,
     ticking: false,  // is the clock ticking for the remaining time bar?
+    debug: false,  // are we in debug-mode?
     color: {  // our palette
         'default': 0xaeaeae,
         'background': 0xd0d0d0,
