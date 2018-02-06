@@ -63,8 +63,8 @@ Ahora en pruebas.
 Para inicializar el proyecto por primera vez (instrucciones en
 https://cordova.apache.org/docs/en/latest/guide/cli/):
 
-# ``cordova create sciencequiz com.sciencequiz.sciencequiz sciencequiz``
-# En ``platforms/android`` añadir la key y el fichero ``release-signing.properties``.
+1. ``cordova create sciencequiz com.sciencequiz.sciencequiz sciencequiz``
+2. En ``platforms/android`` añadir la key y el fichero ``release-signing.properties``.
 
 Cambios previos a la complilación necesarios en los archivos:
 
@@ -76,8 +76,8 @@ También:
 
   document.addEventListener('deviceready', onDeviceReady, false);
   function onDeviceReady() {
-    var game = new Phaser.Game(800, 600, Phaser.AUTO, '',
-                               { preload: preload, create: create, update: update });
+      var game = new Phaser.Game(800, 600, Phaser.AUTO, '',
+                                 { preload: preload, create: create, update: update });
   }
 
 Para compilar la apk:
@@ -88,12 +88,12 @@ Para compilar la apk:
 
 Done!
 
-Tal vez sea interesante usar el template: https://github.com/amex4152/cordova-phaser
+Tal vez sea interesante usar el template: https://github.com/amex4152/cordova-phaser .
 
 ¡Importante! Las apk "unsigned" dan error de "archivo corrupto" si se
 intentan instalar. Hay varias formas de firmarla, la más sencilla con
 diferencia es siguiendo las instrucciones en:
-https://haensel.pro/cordova-create-a-signed-release-apk-easy-howto/
+https://haensel.pro/cordova-create-a-signed-release-apk-easy-howto/ .
 
 
 Compilación para Android con Cocoon
