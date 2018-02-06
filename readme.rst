@@ -54,43 +54,47 @@ Las imágenes grandes se pueden convertir a un tamaño razonable con::
 
   convert -resize 400 img_big.jpg img.jpg
 
-Compilación para Android con Cordova Cli
+
+Compilación para Android con Cordova CLI
 -----------------------------------------
 
-Ahora en pruebas. 
+Ahora en pruebas.
 
-Para inicializar el proyecto por primera vez (instrucciones en https://cordova.apache.org/docs/en/latest/guide/cli/):
+Para inicializar el proyecto por primera vez (instrucciones en
+https://cordova.apache.org/docs/en/latest/guide/cli/):
 
-1. "cordova create sciencequiz com.sciencequiz.sciencequiz sciencequiz"
-
-2. En "platforms/android" añadir la key y el fichero "release-signing.properties")
+# ``cordova create sciencequiz com.sciencequiz.sciencequiz sciencequiz``
+# En ``platforms/android`` añadir la key y el fichero ``release-signing.properties``.
 
 Cambios previos a la complilación necesarios en los archivos:
 
-Añadir "<script type="text/javascript" src="cordova.js"></script>" en index.html
+Añadir ``<script type="text/javascript" src="cordova.js"></script>`` en ``index.html``.
 
-También: 
+También:
 
-"document.addEventListener("deviceready", onDeviceReady, false);
-    
-    function onDeviceReady() {
-      var game = new Phaser.Game(800, 600, Phaser.AUTO, '', { preload: preload, create: create, update: update });
-    }
+.. code:: javascript
 
-Para compilar la apk: 
+  document.addEventListener('deviceready', onDeviceReady, false);
+  function onDeviceReady() {
+    var game = new Phaser.Game(800, 600, Phaser.AUTO, '',
+                               { preload: preload, create: create, update: update });
+  }
 
-Vamos al directorio ("cd sciencequiz")
+Para compilar la apk:
 
-Añadimos la plataforma ("cordova platform add android")
-
-Creamos la apk ("cordova build android --release")
+* Vamos al directorio (``cd sciencequiz``).
+* Añadimos la plataforma (``cordova platform add android``).
+* Creamos la apk (``cordova build android --release``).
 
 Done!
 
 Tal vez sea interesante usar el template: https://github.com/amex4152/cordova-phaser
 
+¡Importante! Las apk "unsigned" dan error de "archivo corrupto" si se
+intentan instalar. Hay varias formas de firmarla, la más sencilla con
+diferencia es siguiendo las instrucciones en:
+https://haensel.pro/cordova-create-a-signed-release-apk-easy-howto/
 
-(¡Importante! Las apk "unsigned" dan error de "archivo corrupto" si se intentan instalar. Hay varias formas de firmarla, la más sencilla con diferencia es siguiendo las instrucciones en: https://haensel.pro/cordova-create-a-signed-release-apk-easy-howto/)
 
 Compilación para Android con Cocoon
 -----------------------------------
