@@ -356,6 +356,7 @@ var state_play = {
     bar_time: {},
     buttons: [],
     right_answer: -1,
+    question: {},
     create: function() {
         add_play_background();
         add_play_header();
@@ -388,10 +389,9 @@ var state_play = {
             bar_time.y = 200 + 0.83 * game.world.height * (1 - fraction);
         }
         else if (fraction < -0.01) {
-            var text = game.rnd.pick([
-                '¡Más rápido!', '¿Problemas con el tiempo?',
-                '¡Ánimo!', 'El tiempo vuela, ¿eh?']);
-            score_and_teach(0, game.add.audio('nope', 0.1), text, '')();
+            var text = question['comments'][0];
+            var img = question['image'];
+            score_and_teach(0, game.add.audio('nope', 0.1), text, img)();
         }
     },
     show_correct: function() {
