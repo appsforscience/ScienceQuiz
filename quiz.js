@@ -26,8 +26,6 @@ var state_load = {
         for (var i = 0; i < images.length; i++)
             gl.image(images[i].slice(0, -4), 'assets/' + images[i]);
 
-        gl.spritesheet('dino', 'assets/dino.png', 200, 217, 3);
-        gl.spritesheet('dino_yes', 'assets/dino_yes.png', 200, 228, 3);
         gl.spritesheet('home', 'assets/home_button.png', 60, 49);
         gl.spritesheet('next', 'assets/next.png', 100, 100);
         gl.spritesheet('more', 'assets/more.png', 100, 100);
@@ -255,7 +253,7 @@ var state_menu = {
             add_menu_background();
             add_menu_header();
             add_category_buttons();
-            add_dino();
+            add_dino('bored1');
         }
         else {
             game.state.start('final');
@@ -378,7 +376,7 @@ var state_play = {
         add_play_background();
         add_play_header();
         add_progress();
-        add_dino();
+        add_dino('talk');
 
         game.global.ticking = true;
         time0 = game.time.time;
@@ -441,7 +439,7 @@ function give_prize() {
         show_earnings(points);  // after the others so it's not covered
     }
     else {
-        add_dino();
+        add_dino('nope');
         add_dino_talk(game.rnd.pick([
             'Otra vez será', 'La próxima irá mejor', '¡Ánimo!']));
     }
@@ -688,28 +686,29 @@ var state_final = {
     create: function() {
         game.stage.backgroundColor = game.global.color.background;
 
+        add_menu_header();
+
         function add_text(y, txt) {
             var text = add_label(game.world.centerX, y, txt);
             text.align = 'center';
             text.anchor.set(0.5);
         }
 
-        add_text(200, '¡¡¡Enhorabuena\n' + game.global.name + '!!!');
-        add_text(500, 'Total de puntos:\n' + game.global.score);
+        add_dino('superhappy');
+        add_dino_talk('¡¡¡Enhorabuena ' + game.global.name + '!!!');
 
         var brag = 'He completado ScienceQuiz y conseguido ' +
             game.global.score + ' puntos!'.replace(/ /g, '%20');
         var tweet = 'https://twitter.com/intent/tweet?text=' + brag;
         var score = 'https://metamagical.org/sciencequiz/add?name=' +
             encodeURIComponent(game.global.name) + '&score=' + game.global.score;
-        add_button(game.global.color.default, 700, 'Subir puntuación a la web',
+        var y = 300;
+        add_button(game.global.color.default, y, 'Subir puntuación a la web',
                    () => window.open(score, '_blank'));
-        add_button(game.global.color.default, 875, 'Compartir en twitter',
+        add_button(game.global.color.default, y + 175, 'Compartir en twitter',
                    () => window.open(tweet, '_blank'));
-        add_button(game.global.color.default, 1050, 'Volver a jugar',
+        add_button(game.global.color.default, y + 2 * 175, 'Volver a jugar',
                    () => { global_reset(); game.state.start('menu'); });
-
-        add_prizes_button();
 
         emit_medals();
     }
@@ -733,7 +732,7 @@ function emit_medals() {
 
 
 function make_particles(x, y, category, goodness) {
-    var emitter = game.add.emitter(x, y, 10);
+    var emitter = game.add.emitter(x, y, 5);
 
     var image = {
         'Medicina': 'Premio_medicina',
@@ -752,7 +751,7 @@ function make_particles(x, y, category, goodness) {
     emitter.setScale(0.5, 0.5, 0.5, 0.5);
     emitter.gravity = 200;
 
-    emitter.start(false, 5000, 100, 10);
+    emitter.start(false, 5000, 100, 5);
 }
 
 
@@ -792,10 +791,7 @@ var state_debug = {
     },
     change_dino: function() {
         current_pose = (current_pose + 1) % poses.length;
-        dino.loadTexture(poses[current_pose]);
-        dino.y = game.world.height - dino.height;
-        dino.animations.add('play');
-        dino.animations.play('play', 10, true);
+        change_dino(dino, poses[current_pose]);
     }
 };
 
@@ -805,24 +801,16 @@ var state_debug = {
 //  *                                                                      *
 //  ************************************************************************
 
-function add_dino(action) {
-    var name = '';
-    var sequence = [];
-    if (action === undefined) {
-        name = 'dino';
-        sequence = [0, 0, 2, 2, 0, 0, 2, 0, 2, 2, 0, 0, 1];
-    }
-    else if (action === 'yes') {
-        name = 'dino_yes';
-        sequence = [0, 1, 0, 2];
-    }
-    var dino = game.add.sprite(0, 0, name);
+function add_dino(action, callback) {
+    var dino = game.add.sprite(0, 0, action);
     dino.y = game.world.height - dino.height;
-    dino.animations.add('animation', sequence)
-    dino.animations.play('animation', 5, true);
+    dino.animations.add('play', range(8))
+    dino.animations.play('play', 10, true);
 
-    dino.inputEnabled = true;
-    dino.events.onInputDown.add(() => game.state.start('debug'));
+    if (callback) {
+        dino.inputEnabled = true;
+        dino.events.onInputDown.add(callback);
+    }
 }
 
 
@@ -971,8 +959,15 @@ function show_earnings(points) {
 }
 
 
-// Add name of category with a checkmark on its left to indicate that
-// it is already done.
+function change_dino(dino, pose) {
+    dino.loadTexture(pose);
+    dino.y = game.world.height - dino.height;
+    dino.animations.add('play');
+    dino.animations.play('play', 10, true);
+}
+
+
+// Add disabled button for a done category.
 function add_done(y, category) {
     function disabled() {
         if (!game.sound.noAudio)
