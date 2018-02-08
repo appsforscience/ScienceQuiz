@@ -6,14 +6,16 @@ game.global = {
     name: '',  // player's name
     score: 0,  // current score
     points_extra: 0,  // extra points to add to a correct answer
-    questions: {},  // {category: [{question: q, answers: [a1, a2, a3],
-                    //              comments: [c1, c2, c3], image: i}, ...], ...}
-    results: {},  // {category: [[question_index, ...], [points_won, ...]}
+    questions: {},    // {category: [{question: q, answers: [a1, a2, a3],
+                      //              comments: [c1, c2, c3], image: i},
+                      //              ...], ...}
+    results: {},      // {category: [[question_index, ...], [points_won, ...]}
     current_category: '',
     selected_questions: [],  // indices of questions for the current category
     current_question: 0,
+    n_questions: 5,  // number of questions per category
     ticking: false,  // is the clock ticking for the remaining time bar?
-    debug: false,  // are we in debug-mode?
+    debug: false,    // are we in debug-mode?
     color: {  // our palette
         'default': 0xaeaeae,
         'background': 0xd0d0d0,
@@ -40,5 +42,6 @@ game.state.add('menu', state_menu);
 game.state.add('play', state_play);
 game.state.add('prizes', state_prizes);
 game.state.add('final', state_final);
+game.state.add('debug', state_debug);
 
 game.state.start('load');

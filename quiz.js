@@ -32,6 +32,23 @@ var state_load = {
         gl.spritesheet('next', 'assets/next.png', 100, 100);
         gl.spritesheet('more', 'assets/more.png', 100, 100);
 
+        var dino_poses = [
+            ['bored1', 1608, 217],
+            ['breathing', 1616, 217],
+            ['happy', 1640, 228],
+            ['nope', 1608, 217],
+            ['sad', 1736, 224],
+            ['sleepy', 1752, 224],
+            ['superhappy', 1680, 249],
+            ['talk', 1608, 217],
+            ['time', 1840, 236],
+            ['yawn', 1672, 287],
+            ['yes', 1680, 251]];
+        for (var i = 0; i < dino_poses.length; i++) {
+            var [img, w, h] = dino_poses[i];
+            game.load.spritesheet(img, 'assets/Animation_' + img + '.png', w / 8, h);
+        }
+
         gl.audio('yes', 'assets/p-ping.mp3');
         gl.audio('nope', 'assets/explosion.mp3');
         gl.audio('blaster', 'assets/blaster.mp3');
@@ -314,8 +331,8 @@ function set_category_and_play(category, n_questions) {
             }
             else {
                 gg.selected_questions = shuffle(n_questions)
-                if (n_questions > 5)
-                    gg.selected_questions = gg.selected_questions.slice(0, 5);
+                if (n_questions > gg.n_questions)
+                    gg.selected_questions = gg.selected_questions.slice(0, gg.n_questions);
             }
             load_images();
             gg.current_question = 0;
@@ -692,6 +709,8 @@ var state_final = {
         add_button(game.global.color.default, 1050, 'Volver a jugar',
                    () => { global_reset(); game.state.start('menu'); });
 
+        add_prizes_button();
+
         emit_medals();
     }
 };
@@ -730,12 +749,55 @@ function make_particles(x, y, category, goodness) {
     emitter.makeParticles(image);
 
     emitter.setRotation(0, 0);
-    emitter.setScale(0.2, 0.5, 0.2, 0.5);
+    emitter.setScale(0.5, 0.5, 0.5, 0.5);
     emitter.gravity = 200;
 
     emitter.start(false, 5000, 100, 10);
 }
 
+
+//  ************************************************************************
+//  *                                                                      *
+//  *                                Debug                                 *
+//  *                                                                      *
+//  ************************************************************************
+
+var state_debug = {
+    dino: {},
+    poses: [],
+    current_pose: 0,
+    create: function() {
+        current_pose = 0;
+        poses = ['bored1',
+                 'breathing',
+                 'happy',
+                 'nope',
+                 'sad',
+                 'sleepy',
+                 'superhappy',
+                 'talk',
+                 'time',
+                 'yawn',
+                 'yes'];
+        var img = poses[current_pose];
+        dino = game.add.sprite(0, 0, img);
+        dino.y = game.world.height - dino.height;
+        dino.animations.add('play');
+        dino.animations.play('play', 10, true);
+        dino.inputEnabled = true;
+        dino.events.onInputDown.add(this.change_dino);
+
+        add_button(game.global.color.default, game.world.centerY,
+                   'Volver al menú', () => game.state.start('menu'));
+    },
+    change_dino: function() {
+        current_pose = (current_pose + 1) % poses.length;
+        dino.loadTexture(poses[current_pose]);
+        dino.y = game.world.height - dino.height;
+        dino.animations.add('play');
+        dino.animations.play('play', 10, true);
+    }
+};
 
 //  ************************************************************************
 //  *                                                                      *
@@ -754,10 +816,13 @@ function add_dino(action) {
         name = 'dino_yes';
         sequence = [0, 1, 0, 2];
     }
-    var puppy = game.add.sprite(0, 0, name);
-    puppy.y = game.world.height - puppy.height;
-    puppy.animations.add('animation', sequence)
-    puppy.animations.play('animation', 5, true);
+    var dino = game.add.sprite(0, 0, name);
+    dino.y = game.world.height - dino.height;
+    dino.animations.add('animation', sequence)
+    dino.animations.play('animation', 5, true);
+
+    dino.inputEnabled = true;
+    dino.events.onInputDown.add(() => game.state.start('debug'));
 }
 
 
