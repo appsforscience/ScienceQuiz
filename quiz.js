@@ -804,7 +804,7 @@ var state_debug = {
 function add_dino(action, callback) {
     var dino = game.add.sprite(0, 0, action);
     dino.y = game.world.height - dino.height;
-    dino.animations.add('play', range(8))
+    dino.animations.add('play', range(8));
     dino.animations.play('play', 10, true);
 
     if (callback) {
