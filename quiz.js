@@ -21,7 +21,8 @@ var state_load = {
             'Premio_natu1.png', 'Premio_natu2.png', 'Premio_natu3.png',
             'Premio_mates1.png', 'Premio_mates2.png', 'Premio_mates3.png',
             'Premio_fisica1.png', 'Premio_fisica2.png', 'Premio_fisica3.png',
-            'Premio_medicina1.png', 'Premio_medicina2.png', 'Premio_medicina3.png',
+            'Premio_medicina1.png', 'Premio_medicina2.png',
+            'Premio_medicina3.png',
         ];
         for (var i = 0; i < images.length; i++)
             gl.image(images[i].slice(0, -4), 'assets/' + images[i]);
@@ -56,14 +57,16 @@ var state_load = {
         gl.bitmapFont('inversionz', 'assets/inversionz.png',
                       'assets/inversionz.xml');
         // inversionz from https://www.dafont.com/inversionz.font
-        //   convert -background none -fill black -font Inversionz.ttf -pointsize 80 label:"-0123456789" inversionz.png
+        //   convert -background none -fill black -font Inversionz.ttf \
+        //           -pointsize 80 label:"-0123456789" inversionz.png
         // to extract, and later (tediously) generate the xml fnt file.
 
-        read_file('contents.tsv');
+        read_file('contents.tsv', parse_questions);
         WebFontConfig = {
             google: { families: ['Ubuntu'] }
         };
-        gl.script('webfont', '//ajax.googleapis.com/ajax/libs/webfont/1.4.7/webfont.js');
+        gl.script('webfont',
+                  '//ajax.googleapis.com/ajax/libs/webfont/1.4.7/webfont.js');
     },
     create: function() {
         game.scale.windowConstraints.bottom = 'visual';
@@ -96,14 +99,11 @@ function read_file(fname, callback) {
     request.open('GET', fname, true);
     request.onload = (e) => {
         if (request.readyState === 4) {
-            if (request.status === 200) {
-                var text = request.responseText.replace(/\r/g, '');
-                game.global.questions = parse_questions(text);
-            }
-            else {
+            if (request.status === 200)
+                callback(request.responseText);
+            else
                 game.debug.text('Problema al leer: ' + fname,
                                 game.world.centerX, game.world.centerY);
-            }
         }
     };
     request.onerror = (e) => game.debug.text(request.statusText);
@@ -111,7 +111,7 @@ function read_file(fname, callback) {
 }
 
 
-// Parse tab-separated fields with contents and return the questions object.
+// Parse tab-separated fields with contents and fill the questions object.
 // questions = {c1: [{question: 'q1',                   // c1 -> category 1
 //                    answers: ['a1r', 'a12', 'a13'],   // ar -> right answer
 //                    comments: ['c1r', 'c12', 'c13'],
@@ -120,8 +120,8 @@ function read_file(fname, callback) {
 //               c2: [ ... ],
 //               ... }
 function parse_questions(text) {
-    var questions = {};
-    var lines = text.split('\n');
+    var questions = game.global.questions;  // shortcut
+    var lines = text.replace(/\r/g, '').split('\n');
     var category = '';
     var current_questions = [];
     for (var i = 0; i < lines.length; i++) {
@@ -147,8 +147,6 @@ function parse_questions(text) {
     }
     if (current_questions.length != 0)  // we are missing the last category
         questions[category] = current_questions; // save previous questions
-
-    return questions;
 }
 
 
@@ -197,7 +195,7 @@ var state_intro = {
 function get_default_name() {
     return game.rnd.pick([
         'RATS',
-        'Sherlock',
+        'Vera',
         'Fry',
         'Leela',
         'Bender',
