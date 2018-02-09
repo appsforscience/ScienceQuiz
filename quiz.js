@@ -312,26 +312,14 @@ function add_category_buttons() {
 // given category (so, actually "playing").
 function set_category_and_play(category, n_questions) {
     return () => {
-        var gg = game.global;  // shortcut
-        gg.current_category = category;
+        game.global.current_category = category;
 
         if (category_started(category)) {
-            gg.selected_questions = gg.results[category][0];
-            gg.current_question = gg.results[category][1].length;
+            recover_position(category)
         }
         else {
-            if (n_questions === undefined)
-                n_questions = gg.questions[category].length;
-            if (gg.debug) {
-                gg.selected_questions = range(n_questions);
-            }
-            else {
-                gg.selected_questions = shuffle(n_questions)
-                if (n_questions > gg.n_questions)
-                    gg.selected_questions = gg.selected_questions.slice(0, gg.n_questions);
-            }
+            select_new_questions(category, n_questions);
             load_images();
-            gg.current_question = 0;
         }
 
         if (!game.sound.noAudio)
@@ -343,6 +331,34 @@ function set_category_and_play(category, n_questions) {
 
 function category_started(category) {
     return Object.keys(game.global.results).indexOf(category) != -1;
+}
+
+
+function recover_position(category) {
+    var gg = game.global;  // shortcut
+    gg.selected_questions = gg.results[category][0];
+    gg.current_question = gg.results[category][1].length;
+}
+
+
+function select_new_questions(category, n_questions) {
+    var gg = game.global;  // shortcut
+    var questions = [];
+
+    if (n_questions === undefined)
+        n_questions = gg.questions[category].length;
+
+    if (gg.debug) {
+        questions = range(n_questions);
+    }
+    else {
+        questions = shuffle(range(n_questions));
+        if (n_questions > gg.n_questions)
+            questions = questions.slice(0, gg.n_questions);
+    }
+
+    gg.selected_questions = questions;
+    gg.current_question = 0;
 }
 
 
@@ -447,7 +463,7 @@ function give_prize() {
 function add_answers(y, answers, comments, image) {
     var audio_yes = game.add.audio('yes', 0.1);
     var audio_nope = game.add.audio('nope', 0.1);
-    reorder = shuffle(answers.length);
+    reorder = shuffle(range(answers.length));
     state_play.buttons = [];
     var delay_ms = 50;
     for (var i = 0; i < answers.length; i++) {
@@ -987,11 +1003,11 @@ function maximize(img, fill_all) {
 }
 
 
-// Return range(n) randomly shuffled.
-function shuffle(n) {
-    var a = range(n);
-    for (var i = 0; i < n; i++) {
-        var j = rand(n);
+// Return array randomly shuffled.
+function shuffle(aa) {
+    var a = aa.slice();  // copy
+    for (var i = 0; i < a.length; i++) {
+        var j = rand(a.length);
         [a[i], a[j]] = [a[j], a[i]];
     }
     return a;
