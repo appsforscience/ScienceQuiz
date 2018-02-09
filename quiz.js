@@ -62,12 +62,13 @@ var state_load = {
         //           -pointsize 80 label:"-0123456789" inversionz.png
         // to extract, and later (tediously) generate the xml fnt file.
 
-        read_file('contents.tsv', parse_questions);
         WebFontConfig = {
             google: { families: ['Ubuntu'] }
         };
         gl.script('webfont',
                   '//ajax.googleapis.com/ajax/libs/webfont/1.4.7/webfont.js');
+
+        read_file('contents.tsv', parse_questions);
     },
     create: function() {
         game.scale.windowConstraints.bottom = 'visual';
@@ -93,8 +94,8 @@ function flash_image(name, ms) {
 }
 
 
-// Read the contents of local file fname and pass them to a callback
-// if successful.
+// Read asynchronously the contents of local file fname and pass them
+// to a callback if successful.
 function read_file(fname, callback) {
     var request = new XMLHttpRequest();
     request.open('GET', fname, true);
@@ -400,11 +401,11 @@ var state_play = {
     buttons: [],
     right_answer: -1,
     question: {},
+    dino: {},
     create: function() {
         add_play_background();
         add_play_header();
         add_progress();
-        add_dino('talk');
 
         game.global.ticking = true;
         time0 = game.time.time;
@@ -417,7 +418,11 @@ var state_play = {
             return;
         }
 
+        this.dino = add_dino('talk');
+        game.time.events.add(3000, () => change_dino(this.dino, 'breathing'));
+        game.time.events.add(18000, () => change_dino(this.dino, 'time'));
         add_dino_talk(question['question']);
+
         add_answers(250, question['answers'],
                     question['comments'], question['image']);
     },
@@ -567,6 +572,11 @@ function score_and_teach(points, audio, txt, image) {
         add_play_header();
         state_play.show_correct();
 
+        if (points > 0)
+            change_dino(state_play.dino, 'yes');
+        else
+            change_dino(state_play.dino, 'nope');
+
         game.time.events.add(5000, () => game.state.start('play'), this);
 
         var group = game.add.group();
@@ -712,7 +722,8 @@ function add_prize(x, y, category, goodness) {
 
 var state_final = {
     create: function() {
-        game.stage.backgroundColor = game.global.color.background;
+        var gg = game.global;  // shortcut
+        game.stage.backgroundColor = gg.color.background;
 
         add_menu_header();
 
@@ -723,19 +734,19 @@ var state_final = {
         }
 
         add_dino('superhappy');
-        add_dino_talk('¡¡¡Enhorabuena ' + game.global.name + '!!!');
+        add_dino_talk('¡¡¡Enhorabuena ' + gg.name + '!!!');
 
         var brag = 'He completado ScienceQuiz y conseguido ' +
-            game.global.score + ' puntos!'.replace(/ /g, '%20');
+            gg.score + ' puntos!'.replace(/ /g, '%20');
         var tweet = 'https://twitter.com/intent/tweet?text=' + brag;
         var score = 'https://metamagical.org/sciencequiz/add?name=' +
-            encodeURIComponent(game.global.name) + '&score=' + game.global.score;
+            encodeURIComponent(gg.name) + '&score=' + gg.score;
         var y = 300;
-        add_button(game.global.color.default, y, 'Subir puntuación a la web',
+        add_button(gg.color.default, y, 'Subir puntuación a la web',
                    () => window.open(score, '_blank'));
-        add_button(game.global.color.default, y + 175, 'Compartir en twitter',
+        add_button(gg.color.default, y + 175, 'Compartir en twitter',
                    () => window.open(tweet, '_blank'));
-        add_button(game.global.color.default, y + 2 * 175, 'Volver a jugar',
+        add_button(gg.color.default, y + 2 * 175, 'Volver a jugar',
                    () => { global_reset(); game.state.start('menu'); });
 
         emit_medals();
@@ -832,13 +843,15 @@ var state_debug = {
 function add_dino(action, callback) {
     var dino = game.add.sprite(0, 0, action);
     dino.y = game.world.height - dino.height;
-    dino.animations.add('play', range(8));
+    var frames = [0, 1, 2, 3, 4, 5, 6, 7, 6, 5, 4, 3, 2, 1];
+    dino.animations.add('play', frames);
     dino.animations.play('play', 10, true);
 
     if (callback) {
         dino.inputEnabled = true;
         dino.events.onInputDown.add(callback);
     }
+    return dino;
 }
 
 
@@ -899,7 +912,7 @@ function add_home_button() {
 }
 
 
-// Add sound on/of button.
+// Add sound on/off button.
 function add_sound_button() {
     var img = game.add.sprite(game.width - 60, 50,
                               'speaker_' + (game.sound.noAudio ? 'off' : 'on'));
@@ -990,7 +1003,8 @@ function show_earnings(points) {
 function change_dino(dino, pose) {
     dino.loadTexture(pose);
     dino.y = game.world.height - dino.height;
-    dino.animations.add('play');
+    var frames = [0, 1, 2, 3, 4, 5, 6, 7, 6, 5, 4, 3, 2, 1];
+    dino.animations.add('play', frames);
     dino.animations.play('play', 10, true);
 }
 
