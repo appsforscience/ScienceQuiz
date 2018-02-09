@@ -1,4 +1,4 @@
-// ScienceQuiz, the quiz game!
+// ¿Sabes de Ciencia?, the quiz game!
 
 var game = new Phaser.Game(720, 1280, Phaser.AUTO, 'game');
 

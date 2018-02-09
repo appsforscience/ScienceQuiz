@@ -736,10 +736,10 @@ var state_final = {
         add_dino('superhappy');
         add_dino_talk('¡¡¡Enhorabuena ' + gg.name + '!!!');
 
-        var brag = 'He completado ScienceQuiz y conseguido ' +
+        var brag = 'He completado ¿Sabes de Ciencia? y conseguido ' +
             gg.score + ' puntos!'.replace(/ /g, '%20');
         var tweet = 'https://twitter.com/intent/tweet?text=' + brag;
-        var score = 'https://metamagical.org/sciencequiz/add?name=' +
+        var score = 'https://metamagical.org/sdc/add?name=' +
             encodeURIComponent(gg.name) + '&score=' + gg.score;
         var y = 300;
         add_button(gg.color.default, y, 'Subir puntuación a la web',

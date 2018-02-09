@@ -39,12 +39,16 @@ def compare_expected_files():
     expected = ({get_fname(url) for url in get_contents_urls()} |
                 set(get_contents_fnames()))
     existing = set(os.listdir('.')) - {'.', '..', 'get_images.py'}
-    print('-- Expected files that are missing (why?):')
-    for fname in expected - existing:
-        print(' ', fname)
-    print('-- Unexpected existing files (probably legacy, "git rm" them):')
-    for fname in existing - expected:
-        print(' ', fname)
+    missing = expected - existing
+    if missing:
+        print('-- Expected files that are missing (why?):')
+        for fname in missing:
+            print(' ', fname)
+    unexpected = existing - expected
+    if unexpected:
+        print('-- Unexpected existing files (probably legacy, "git rm" them):')
+        for fname in unexpected:
+            print(' ', fname)
 
 
 def get_contents_urls():

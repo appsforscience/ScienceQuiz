@@ -1,7 +1,10 @@
-Prototipo para Science Quiz
-===========================
+¿Sabes de Ciencia?
+==================
 
-Prototipo usando phaser en lugar de godot.
+¿Sabes de Ciencia? es un juego de preguntas sobre temas
+científicos. Está hecho en html5 usando `phaser`_.
+
+.. _`phaser`: https://phaser.io
 
 El `phaser.js` que usamos es el que viene del "community edition"
 v.2.10.0, y antes lo incluíamos así::
@@ -63,7 +66,7 @@ Ahora en pruebas.
 Para inicializar el proyecto por primera vez (instrucciones en
 https://cordova.apache.org/docs/en/latest/guide/cli/):
 
-1. ``cordova create sciencequiz com.sciencequiz.sciencequiz sciencequiz``
+1. ``cordova create sdc org.appsforscience.sdc sdc``
 2. En ``platforms/android`` añadir la key y el fichero ``release-signing.properties``.
 
 Cambios previos a la complilación necesarios en los archivos:
@@ -82,7 +85,7 @@ También:
 
 Para compilar la apk:
 
-* Vamos al directorio (``cd sciencequiz``).
+* Vamos al directorio (``cd sdc``).
 * Añadimos la plataforma (``cordova platform add android``).
 * Creamos la apk (``cordova build android --release``).
 
