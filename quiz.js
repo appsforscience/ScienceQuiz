@@ -45,7 +45,8 @@ var state_load = {
             ['yes', 1680, 251]];
         for (var i = 0; i < dino_poses.length; i++) {
             var [img, w, h] = dino_poses[i];
-            game.load.spritesheet(img, 'assets/Animation_' + img + '.png', w / 8, h);
+            var path = 'assets/Animation_' + img + '.png';
+            game.load.spritesheet(img, path, w / 8, h);
         }
 
         gl.audio('yes', 'assets/p-ping.mp3');
@@ -185,7 +186,7 @@ var state_intro = {
     create: function() {
         var gg = game.global;  // shortcut
         game.stage.backgroundColor = gg.color.background;
-        var name = prompt('\n¡Hola!\n\n¿Cómo te llamas?\n', get_default_name());
+        var name = prompt('¡Hola!\n\n¿Cómo te llamas?\n', get_default_name());
         gg.name = name ? name.slice(0, 16) : 'persona anónima';
         game.state.start('menu');
     }
@@ -416,7 +417,7 @@ var state_play = {
             return;
         }
 
-        var qtext = add_dino_talk(question['question']);
+        add_dino_talk(question['question']);
         add_answers(250, question['answers'],
                     question['comments'], question['image']);
     },
@@ -540,9 +541,9 @@ function add_play_header() {
 
 
 function add_progress() {
-    var gg = game.global;  // shortcut
-    var text = '' + (gg.current_question + 1) + ' / ' + gg.selected_questions.length;
-    add_label(game.world.width - 200, game.world.height - 100, text);
+    var [gg, gw] = [game.global, game.world];  // shortcuts
+    var [done, total] = [gg.current_question + 1, gg.selected_questions.length];
+    add_label(gw.width - 200, gw.height - 100, done + ' / ' + total);
 }
 
 
@@ -558,9 +559,9 @@ function score_and_teach(points, audio, txt, image) {
         gg.score += points;
 
         // Add points to the result of this question.
-        if (Object.keys(gg.results).indexOf(gg.current_category) === -1)
-            gg.results[gg.current_category] = [gg.selected_questions.slice(), []]
-        var i = gg.selected_questions[gg.current_question];
+        if (!category_started(gg.current_category))
+            gg.results[gg.current_category] = [gg.selected_questions.slice(),
+                                               []];
         gg.results[gg.current_category][1].push(points);
 
         add_play_header();
