@@ -88,7 +88,7 @@ var state_load = {
 function flash_image(name, ms) {
     var img = game.add.sprite(game.world.centerX, game.world.centerY, name);
     img.anchor.set(0.5);
-    img.scale.set(3);
+    img.scale.set(1.5);
     img.alpha = 0;
     game.add.tween(img).to({alpha: 1}, ms, null, true, 0, 0, true);
 }
@@ -463,7 +463,7 @@ function give_prize() {
     medal.alpha = 0.2;
     maximize(medal);
     if (result_goodness(game.global.current_category) <= 3) {
-        add_dino('yes');
+        add_dino('happy');
         add_dino_talk(game.rnd.pick([
             '¡Genial!', '¡Bravo!', '¡Estupendo!', '¡Qué guay!']));
         game.add.tween(medal).to({alpha: 1}, 1000, null, true, 0, 0, false);
@@ -472,7 +472,7 @@ function give_prize() {
         show_earnings(points);  // after the others so it's not covered
     }
     else {
-        add_dino('nope');
+        add_dino('yawn');
         add_dino_talk(game.rnd.pick([
             'Otra vez será', 'La próxima irá mejor', '¡Ánimo!']));
     }
@@ -739,7 +739,7 @@ var state_final = {
         var brag = 'He completado ¿Sabes de Ciencia? y conseguido ' +
             gg.score + ' puntos!'.replace(/ /g, '%20');
         var tweet = 'https://twitter.com/intent/tweet?text=' + brag;
-        var score = 'https://metamagical.org/sdc/add?name=' +
+        var score = 'https://metamagical.org/sdc/puntuaciones/add?name=' +
             encodeURIComponent(gg.name) + '&score=' + gg.score;
         var y = 300;
         add_button(gg.color.default, y, 'Subir puntuación a la web',
