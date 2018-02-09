@@ -13,7 +13,7 @@ game.global = {
     current_category: '',
     selected_questions: [],  // indices of questions for the current category
     current_question: 0,
-    n_questions: 1,  // number of questions per category
+    n_questions: 5,  // number of questions per category
     ticking: false,  // is the clock ticking for the remaining time bar?
     debug: false,    // are we in debug-mode?
     color: {  // our palette
