@@ -246,7 +246,7 @@ var state_tutorial = {
 
 var state_menu = {
     create: function() {
-        if (!all_done()) {
+        if (!all_categories_done()) {
             add_debug_button();
             add_menu_background();
             add_menu_header();
@@ -261,13 +261,33 @@ var state_menu = {
 
 
 // Return true only if all questions in all categories have been done.
-function all_done() {
+function all_categories_done() {
     var gg = game.global;  // shortcut
     for (category in gg.questions)
-        if (Object.keys(gg.results).indexOf(category) === -1 ||
-            gg.results[category][1].length < gg.results[category][0].length)
+        if (!category_done(category))
             return false;
     return true;
+}
+
+
+function category_done(category) {
+    var results = game.global.results;
+    return category_started(category) &&
+        questions_done(category).length === questions_selected(category).length;
+}
+
+
+function questions_done(category) {
+    return game.global.results[category][1];
+}
+
+
+function questions_selected(category) {
+    return game.global.results[category][0];
+}
+
+function category_started(category) {
+    return Object.keys(game.global.results).indexOf(category) != -1;
 }
 
 
@@ -293,8 +313,7 @@ function add_category_buttons() {
     var gg = game.global;  // shortcut
     for (var category in gg.questions) {
         var element = {};
-        if (Object.keys(gg.results).indexOf(category) === -1 ||
-            gg.results[category][1].length < gg.results[category][0].length) {
+        if (!category_done(category)) {
             element = add_button(gg.color[category] || gg.color.default,
                                  y, category,
                                  set_category_and_play(category), delay_ms);
@@ -310,7 +329,7 @@ function add_category_buttons() {
 
 // Return a function that, when called, starts asking questions of the
 // given category (so, actually "playing").
-function set_category_and_play(category, n_questions) {
+function set_category_and_play(category) {
     return () => {
         game.global.current_category = category;
 
@@ -318,7 +337,7 @@ function set_category_and_play(category, n_questions) {
             recover_position(category)
         }
         else {
-            select_new_questions(category, n_questions);
+            select_new_questions(category);
             load_images();
         }
 
@@ -329,24 +348,18 @@ function set_category_and_play(category, n_questions) {
 }
 
 
-function category_started(category) {
-    return Object.keys(game.global.results).indexOf(category) != -1;
-}
-
-
 function recover_position(category) {
     var gg = game.global;  // shortcut
-    gg.selected_questions = gg.results[category][0];
-    gg.current_question = gg.results[category][1].length;
+    gg.selected_questions = questions_selected(category);
+    gg.current_question = questions_done(category).length;
 }
 
 
-function select_new_questions(category, n_questions) {
+function select_new_questions(category) {
     var gg = game.global;  // shortcut
     var questions = [];
 
-    if (n_questions === undefined)
-        n_questions = gg.questions[category].length;
+    n_questions = gg.questions[category].length;
 
     if (gg.debug) {
         questions = range(n_questions);
