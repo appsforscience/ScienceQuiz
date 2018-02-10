@@ -40,6 +40,5 @@ game.state.add('menu', state_menu);
 game.state.add('play', state_play);
 game.state.add('prizes', state_prizes);
 game.state.add('final', state_final);
-game.state.add('debug', state_debug);
 
 game.state.start('load');

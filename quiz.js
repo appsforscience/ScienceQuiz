@@ -196,15 +196,10 @@ var state_intro = {
 
 function get_default_name() {
     return game.rnd.pick([
-        'RATS',
-        'Vera',
-        'Fry',
-        'Leela',
-        'Bender',
-        'Zoidberg',
-        'Leia',
-        'Wendy Freedman',
-        'Winnie the Pooh']);
+        'RATS', 'Ada', 'Elaine Marley', 'Vera',
+        'Leela', 'Bender', 'Zoidberg',
+        'Leia', 'BB-8', 'K-2SO',
+        'Wendy Freedman']);
 }
 
 
@@ -215,19 +210,64 @@ function get_default_name() {
 //  ************************************************************************
 
 var state_menu = {
+    current_text: {},
+    tutorial_texts: [],
+    text_i: 0,
     create: function() {
         if (!all_categories_done()) {
             add_debug_button();
             add_menu_background();
             add_menu_header();
             add_category_buttons();
-            add_dino('bored1');
+            this.tutorial_texts = get_tutorial_texts();
+            this.text_i = 0;
+            this.current_text = add_dino_talk(
+                '¡Hola ' + game.global.name + '!\n' +
+                    'Soy Tiranosara Rex, tu guía. Si quieres saber cómo jugar ' +
+                    'puedes hacer click sobre mí');
+            game.time.events.add(5000, () => this.current_text.destroy());
+            add_dino('bored1', () => this.tutorial());
         }
         else {
             game.state.start('final');
         }
+    },
+    tutorial: function() {
+        game.time.events.removeAll();
+
+        if (this.current_text)
+            this.current_text.destroy();
+
+        if (this.text_i < this.tutorial_texts.length)
+            this.current_text = add_dino_talk(this.tutorial_texts[this.text_i++]);
+        else
+            this.text_i = 0;
     }
 };
+
+
+function get_tutorial_texts() {
+    return [
+        ('Para jugar, ve eligiendo categorías. ' +
+         'Después de responder una pregunta puedes tocar ' +
+         'en el interrogante que aparece para saber más. ' +
+         'En la pantalla de información puedes tocar en cualquier sitio para ' +
+         'avanzar a la siguiente pregunta.'),
+        ('Cuanto más rápido respondas la pregunta, más puntos conseguirás. ' +
+         'Superarás el reto si aciertas al menos 3 preguntas.\n' +
+         '3 aciertos: medalla de bronce\n' +
+         '4 aciertos: medalla de plata\n' +
+         '5 aciertos: ¡medalla de oro!\n'),
+        ('Si necesitas pausar el juego, toca el icono de la casa para volver ' +
+         'al menú principal. Puedes ver tus medallas tocando sobre el icono ' +
+         'del trofeo.'),
+        // Si tocas sobre una moneda podrás ver las respuestas.
+        //     Pincha sobre este texto para seguir leyendo.
+        ('Si quieres que vuelva a salir este tutorial, pincha sobre mí. ' +
+         'Intenta no hacerme cosquillas 😉 ' +
+         '¿Vamos allá?\n' +
+         'Sin ciencia no hay futuro. No seas como mi especie. ¡Aprende ciencia!')];
+}
 
 
 // Return true only if all questions in all categories have been done.
@@ -545,6 +585,7 @@ function score_and_teach(points, audio, txt, image) {
         else
             change_dino(state_play.dino, 'nope');
 
+        game.time.events.removeAll();
         game.time.events.add(5000, () => game.state.start('play'), this);
 
         var group = game.add.group();
@@ -764,46 +805,6 @@ function make_particles(x, y, category, goodness) {
 
 //  ************************************************************************
 //  *                                                                      *
-//  *                                Debug                                 *
-//  *                                                                      *
-//  ************************************************************************
-
-var state_debug = {
-    dino: {},
-    poses: [],
-    current_pose: 0,
-    create: function() {
-        current_pose = 0;
-        poses = ['bored1',
-                 'breathing',
-                 'happy',
-                 'nope',
-                 'sad',
-                 'sleepy',
-                 'superhappy',
-                 'talk',
-                 'time',
-                 'yawn',
-                 'yes'];
-        var img = poses[current_pose];
-        dino = game.add.sprite(0, 0, img);
-        dino.y = game.world.height - dino.height;
-        dino.animations.add('play');
-        dino.animations.play('play', 10, true);
-        dino.inputEnabled = true;
-        dino.events.onInputDown.add(this.change_dino);
-
-        add_button(game.global.color.default, game.world.centerY,
-                   'Volver al menú', () => game.state.start('menu'));
-    },
-    change_dino: function() {
-        current_pose = (current_pose + 1) % poses.length;
-        change_dino(dino, poses[current_pose]);
-    }
-};
-
-//  ************************************************************************
-//  *                                                                      *
 //  *                              Utilities                               *
 //  *                                                                      *
 //  ************************************************************************
@@ -852,8 +853,9 @@ function add_dino_talk(text) {
     group.y = game.world.height - 200;
     game.add.tween(group).to({width: w, height: h, x: 0, y: 0},
                              400, null, true, 0, 0);
+    group.inputEnabled = true;
 
-    return qtext;
+    return group;
 }
 
 
