@@ -36,8 +36,6 @@ function global_reset() {
 
 game.state.add('load', state_load);
 game.state.add('intro', state_intro);
-game.state.add('pretutorial', state_pretutorial);
-game.state.add('tutorial', state_tutorial);
 game.state.add('menu', state_menu);
 game.state.add('play', state_play);
 game.state.add('prizes', state_prizes);

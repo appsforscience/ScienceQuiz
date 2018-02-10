@@ -210,38 +210,6 @@ function get_default_name() {
 
 //  ************************************************************************
 //  *                                                                      *
-//  *                             Pretutorial                              *
-//  *                                                                      *
-//  ************************************************************************
-
-var state_pretutorial = {
-    create: function() {
-        var gg = game.global;  // shortcut
-        add_button(gg.color.default, 300, 'Tutorial',
-                   () => game.state.start('tutorial'), 50);
-        add_button(gg.color.default, 500, 'Jugar',
-                   () => game.state.start('menu'), 100);
-    }
-};
-
-
-//  ************************************************************************
-//  *                                                                      *
-//  *                               Tutorial                               *
-//  *                                                                      *
-//  ************************************************************************
-
-var state_tutorial = {
-    create: function() {
-        add_button(game.global.color.default, 500, 'Jugar',
-                   () => game.state.start('menu'), 50);
-        // TODO
-    }
-};
-
-
-//  ************************************************************************
-//  *                                                                      *
 //  *                                 Menu                                 *
 //  *                                                                      *
 //  ************************************************************************
