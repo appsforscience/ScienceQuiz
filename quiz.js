@@ -231,8 +231,8 @@ var state_menu = {
             if (game.global.first_time) {
                 this.current_text = add_dino_talk(
                     '¡Hola ' + game.global.name + '!\n' +
-                        'Soy Dino Rex, tu guía. Si quieres saber cómo jugar ' +
-                        'puedes hacer click sobre mí',
+                        'Soy Tiranosara Rex, tu guía. Si quieres saber cómo ' +
+                        'jugar puedes hacer click sobre mí',
                     () => state_menu.tutorial());
                 game.time.events.add(10000, () => this.current_text.destroy());
                 game.global.first_time = false;
@@ -491,7 +491,7 @@ function give_prize() {
                           result_goodness(game.global.current_category));
     medal.alpha = 0.2;
     maximize(medal);
-    var more_info = '\n\nDale a cualquier medalla para repasar las pruebas.';
+    var more_info = '\n\nDale a cualquier medalla para repasar las respuestas.';
     if (result_goodness(game.global.current_category) <= 3) {
         add_dino('happy');
         add_dino_talk(game.rnd.pick([
