@@ -980,6 +980,8 @@ function show_earnings(points) {
     var gw = game.world;
     var text = add_label(gw.centerX, gw.centerY,
                          (points >= 0 ? '+' : '') + points);
+    text.fontSize = 100;
+    text.fill = (points > 0) ? 'green' : 'red';
     text.anchor.set(0.5);
     game.add.tween(text).to({alpha: 0,
                              height: 5 * text.height,
