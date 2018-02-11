@@ -7,8 +7,11 @@
 //  ************************************************************************
 
 var state_load = {
-    label_loading: {},
+    msg_loading: {},
     preload: function() {
+        this.msg_loading = game.add.text(100, 100, 'Cargando (prepárate)...',
+                                         {font: '40px Arial', fill: '#ff0044'});
+
         var gl = game.load;  // shortcut
 
         var images = [
@@ -71,6 +74,8 @@ var state_load = {
         read_file('contents.tsv', parse_questions);
     },
     create: function() {
+        this.msg_loading.destroy();
+
         game.scale.windowConstraints.bottom = 'visual';
         // See http://www.html5gamedevs.com/topic/11007-question-about-scale-mode-show_all-in-22/
         game.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
