@@ -634,10 +634,13 @@ function score_and_teach(points, audio, txt, image) {
 
 // Show a screen with an image and a caption text. Whenever anything is
 // touched it goes to the "Play" state. Normally used to teach about a subject.
-function teach(txt, image) {
+function teach(txt, image, callback) {
     var bg = add_play_background();
     bg.inputEnabled = true;
-    bg.events.onInputDown.add(() => game.state.start('play'));
+    if (!callback)
+        bg.events.onInputDown.add(() => game.state.start('play'));
+    else
+        bg.events.onInputDown.add(callback);
 
     var y_text = 50;
     if (image) {
@@ -737,6 +740,8 @@ function add_prize(x, y, category, goodness) {
     var group = game.add.group();
     var prize = add_medal(x, y, category, goodness);
     prize.scale.set(0.35);
+    prize.inputEnabled = true;
+    prize.events.onInputDown.add(() => recap(category, 0));
     var text = add_label(x, prize.y + prize.height / 2 + 10, category);
     group.addMultiple([prize, text]);
     return group;
@@ -820,6 +825,30 @@ function make_particles(x, y, category, goodness) {
     emitter.gravity = 200;
 
     emitter.start(false, 5000, 100, 5);
+}
+
+
+//  ************************************************************************
+//  *                                                                      *
+//  *                                Recap                                 *
+//  *                                                                      *
+//  ************************************************************************
+
+function recap(category, question_index) {
+    if (!category_done(category))
+        return;
+
+    var indices = questions_selected(category);
+    if (question_index >= indices.length) {
+        game.state.start('prizes');
+        return;
+    }
+
+    var gg = game.global;  // shortcut
+    var i = indices[question_index];
+    var question = gg.questions[category][i];
+    teach(question['comments'][0], question['image'],
+          () => recap(category, question_index + 1));
 }
 
 
