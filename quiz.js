@@ -9,8 +9,8 @@
 var state_load = {
     msg_loading: {},
     preload: function() {
-        this.msg_loading = game.add.text(100, 100, 'Cargando (prepárate)...',
-                                         {font: '40px Arial', fill: '#ff0044'});
+        this.msg_loading = game.add.text(50, 50, 'Cargando (prepárate)...',
+                                         {font: '20px Arial', fill: '#ff0044'});
 
         var gl = game.load;  // shortcut
 
@@ -232,7 +232,8 @@ var state_menu = {
                 this.current_text = add_dino_talk(
                     '¡Hola ' + game.global.name + '!\n' +
                         'Soy Dino Rex, tu guía. Si quieres saber cómo jugar ' +
-                        'puedes hacer click sobre mí');
+                        'puedes hacer click sobre mí',
+                    () => state_menu.tutorial());
                 game.time.events.add(10000, () => this.current_text.destroy());
                 game.global.first_time = false;
             }
@@ -484,25 +485,26 @@ var state_play = {
 function give_prize() {
     var bg = add_play_background();
     bg.inputEnabled = true;
-    bg.events.onInputDown.add(() => game.state.start('menu'));
+    bg.events.onInputDown.add(() => game.state.start('prizes'));
     var medal = add_medal(game.world.centerX, game.world.centerY - 100,
                           game.global.current_category,
                           result_goodness(game.global.current_category));
     medal.alpha = 0.2;
     maximize(medal);
+    var more_info = '\n\nDale a cualquier medalla para repasar las pruebas.';
     if (result_goodness(game.global.current_category) <= 3) {
         add_dino('happy');
         add_dino_talk(game.rnd.pick([
-            '¡Genial!', '¡Bravo!', '¡Estupendo!', '¡Qué guay!']));
+            '¡Genial!', '¡Bravo!', '¡Estupendo!', '¡Qué guay!']) + more_info);
         game.add.tween(medal).to({alpha: 1}, 1000, null, true, 0, 0, false);
         var points = 300;
         game.global.score += points;
         show_earnings(points);  // after the others so it's not covered
     }
     else {
-        add_dino('yawn');
+        add_dino('breathing');
         add_dino_talk(game.rnd.pick([
-            'Otra vez será', 'La próxima irá mejor', '¡Ánimo!']));
+            'Otra vez será.', 'La próxima irá mejor.', '¡Ánimo!']) + more_info);
     }
 }
 
@@ -740,8 +742,11 @@ function add_prize(x, y, category, goodness) {
     var group = game.add.group();
     var prize = add_medal(x, y, category, goodness);
     prize.scale.set(0.35);
-    prize.inputEnabled = true;
-    prize.events.onInputDown.add(() => recap(category, 0));
+    if (category_done(category)) {
+        prize.inputEnabled = true;
+        prize.input.useHandCursor = true;
+        prize.events.onInputDown.add(() => recap(category, 0));
+    }
     var text = add_label(x, prize.y + prize.height / 2 + 10, category);
     group.addMultiple([prize, text]);
     return group;
