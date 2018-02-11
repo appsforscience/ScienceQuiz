@@ -215,31 +215,39 @@ var state_menu = {
     text_i: 0,
     create: function() {
         if (!all_categories_done()) {
-            add_debug_button();
             add_menu_background();
+            add_remove_texts_layer();
             add_menu_header();
             add_category_buttons();
+            if (!game.global.release)
+                add_debug_button();
             this.tutorial_texts = get_tutorial_texts();
             this.text_i = 0;
-            this.current_text = add_dino_talk(
-                '¡Hola ' + game.global.name + '!\n' +
-                    'Soy Tiranosara Rex, tu guía. Si quieres saber cómo jugar ' +
-                    'puedes hacer click sobre mí');
-            game.time.events.add(5000, () => this.current_text.destroy());
+            if (game.global.first_time) {
+                this.current_text = add_dino_talk(
+                    '¡Hola ' + game.global.name + '!\n' +
+                        'Soy Dino Rex, tu guía. Si quieres saber cómo jugar ' +
+                        'puedes hacer click sobre mí');
+                game.time.events.add(10000, () => this.current_text.destroy());
+                game.global.first_time = false;
+            }
             add_dino('bored1', () => this.tutorial());
         }
         else {
             game.state.start('final');
         }
     },
-    tutorial: function() {
+    remove_texts: function() {
         game.time.events.removeAll();
 
         if (this.current_text)
             this.current_text.destroy();
-
+    },
+    tutorial: function() {
+        this.remove_texts();
         if (this.text_i < this.tutorial_texts.length)
-            this.current_text = add_dino_talk(this.tutorial_texts[this.text_i++]);
+            this.current_text = add_dino_talk(this.tutorial_texts[this.text_i++],
+                                              () => state_menu.tutorial());
         else
             this.text_i = 0;
     }
@@ -249,31 +257,28 @@ var state_menu = {
 function get_tutorial_texts() {
     return [
         ('Para jugar, ve eligiendo categorías. ' +
-         'Después de responder una pregunta puedes tocar ' +
-         'en el interrogante que aparece para saber más. ' +
-         'En la pantalla de información puedes tocar en cualquier sitio para ' +
-         'avanzar a la siguiente pregunta.'),
+         'Después de responder una pregunta aparecen dos nuevos botones:\n' +
+         '  "?" saber más\n' +
+         '  ">" continuar\n' +
+         'En la pantalla de "saber más" toca en cualquier sitio para seguir.'),
         ('Cuanto más rápido respondas la pregunta, más puntos conseguirás. ' +
          'Superarás el reto si aciertas al menos 3 preguntas.\n' +
          '3 aciertos: medalla de bronce\n' +
          '4 aciertos: medalla de plata\n' +
          '5 aciertos: ¡medalla de oro!\n'),
-        ('Si necesitas pausar el juego, toca el icono de la casa para volver ' +
-         'al menú principal. Puedes ver tus medallas tocando sobre el icono ' +
-         'del trofeo.'),
+        ('Puedes ver tus medallas dando al icono del trofeo, y puedes ' +
+         'pausar el juego dando al icono de la casa que saldrá arriba.'),
         // Si tocas sobre una moneda podrás ver las respuestas.
         //     Pincha sobre este texto para seguir leyendo.
         ('Si quieres que vuelva a salir este tutorial, pincha sobre mí. ' +
          'Intenta no hacerme cosquillas 😉 ' +
-         '¿Vamos allá?\n' +
          'Sin ciencia no hay futuro. No seas como mi especie. ¡Aprende ciencia!')];
 }
 
 
 // Return true only if all questions in all categories have been done.
 function all_categories_done() {
-    var gg = game.global;  // shortcut
-    for (category in gg.questions)
+    for (category in game.global.questions)
         if (!category_done(category))
             return false;
     return true;
@@ -306,6 +311,16 @@ function add_menu_background() {
         game.stage.backgroundColor = game.global.color.background;
     else
         game.stage.backgroundColor = 0xff0000;
+}
+
+
+function add_remove_texts_layer() {
+    var bg = game.add.graphics();
+    bg.beginFill(0xffffff, 0);
+    bg.drawRect(0, 0, game.world.width, game.world.height);
+    bg.endFill();
+    bg.inputEnabled = true;
+    bg.events.onInputDown.add(() => state_menu.remove_texts());
 }
 
 
@@ -825,7 +840,7 @@ function add_dino(action, callback) {
 
 
 // Add bubble with the text that dino is saying.
-function add_dino_talk(text) {
+function add_dino_talk(text, callback) {
     var group = game.add.group();
 
     var bubble = game.add.graphics(0, 0);
@@ -853,7 +868,9 @@ function add_dino_talk(text) {
     group.y = game.world.height - 200;
     game.add.tween(group).to({width: w, height: h, x: 0, y: 0},
                              400, null, true, 0, 0);
-    group.inputEnabled = true;
+    bubble.inputEnabled = true;
+    if (callback)
+        bubble.events.onInputDown.add(callback);
 
     return group;
 }

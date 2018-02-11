@@ -13,9 +13,11 @@ game.global = {
     current_category: '',
     selected_questions: [],  // indices of questions for the current category
     current_question: 0,
-    n_questions: 5,  // number of questions per category
-    ticking: false,  // is the clock ticking for the remaining time bar?
-    debug: false,    // are we in debug-mode?
+    n_questions: 5,    // number of questions per category
+    ticking: false,    // is the clock ticking for the remaining time bar?
+    debug: false,      // are we in debug-mode?
+    first_time: true,  // is it the first time we play?
+    release: false,    // to remove debugging stuf (for a release)
     color: {  // our palette
         'default': 0xaeaeae,
         'background': 0xd0d0d0,
