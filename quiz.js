@@ -39,12 +39,9 @@ var state_load = {
             ['breathing', 1616, 217],
             ['happy', 1640, 228],
             ['nope', 1608, 217],
-            ['sad', 1736, 224],
-            ['sleepy', 1752, 224],
             ['superhappy', 1680, 249],
             ['talk', 1608, 217],
             ['time', 1840, 236],
-            ['yawn', 1672, 287],
             ['yes', 1680, 251]];
         for (var i = 0; i < dino_poses.length; i++) {
             var [img, w, h] = dino_poses[i];
@@ -232,7 +229,7 @@ var state_menu = {
                 this.current_text = add_dino_talk(
                     '¡Hola ' + game.global.name + '!\n' +
                         'Soy Tiranosara Rex, tu guía. Si quieres saber cómo ' +
-                        'jugar puedes hacer click sobre mí',
+                        'jugar puedes hacer click sobre mí.',
                     () => state_menu.tutorial());
                 game.time.events.add(10000, () => this.current_text.destroy());
                 game.global.first_time = false;
@@ -365,17 +362,24 @@ function set_category_and_play(category) {
         game.global.current_category = category;
 
         if (category_started(category)) {
-            recover_position(category)
+            recover_position(category);
+            play();
         }
         else {
             select_new_questions(category);
             load_images();
+            state_menu.remove_texts();
+            add_dino_talk('Cargando información...');
+            game.load.onLoadComplete.add(play, this);
         }
-
-        if (!game.sound.noAudio)
-            game.add.audio('menu', 0.05).play();
-        game.state.start('play');
     };
+}
+
+
+function play() {
+    if (!game.sound.noAudio)
+        game.add.audio('menu', 0.05).play();
+    game.state.start('play');
 }
 
 
