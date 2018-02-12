@@ -4,7 +4,7 @@ all:
 
 upload:
 	rsync -azv -e ssh *.html *.css *.js *.tsv assets puntuaciones \
-	    bb:/var/www/appsforscience.org/sdc
+	    --exclude results.txt bb:/var/www/appsforscience.org/sdc
 
 zip:
 	rm -f sdc.zip
