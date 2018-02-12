@@ -3,7 +3,7 @@ all:
 	@echo make zip - creates a zip that can be used with cocoon
 
 upload:
-	rsync -azv -e ssh *.html *.js *.tsv assets bb:/var/www/appsforscience.org/sdc
+	rsync -azv -e ssh *.html *.css *.js *.tsv assets puntuaciones bb:/var/www/appsforscience.org/sdc
 
 zip:
 	rm -f sdc.zip

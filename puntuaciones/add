@@ -1,0 +1,23 @@
+#!/usr/bin/env python3
+
+import cgi
+
+form = cgi.FieldStorage()
+
+with open('results.txt', 'at') as f:
+    if 'name' not in form or 'score' not in form:
+        f.write('Faltan campos "name" y "score".\n')
+    else:
+        f.write('%s\t%s\n' % (form['name'].value, form['score'].value))
+
+print('Content-Type: text/html\n')
+
+url = 'https://appsforscience.org/sdc/puntuaciones/'
+print("""<!DOCTYPE html>
+<head>
+  <meta http-equiv="refresh" content="0; URL=%s" />
+</head>
+<body>
+</body>
+</html>
+""" % url)
