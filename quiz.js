@@ -1,8 +1,12 @@
 // The different scenes ("states") of the game.
 
+// TODO: Load the assets and question images in a more asynchronous way
+//       so as to minimally interrupt the player.
+
+
 //  ************************************************************************
 //  *                                                                      *
-//  *                                Load.                                 *
+//  *                                Load                                  *
 //  *                                                                      *
 //  ************************************************************************
 
@@ -920,6 +924,7 @@ function add_dino_talk(text, callback) {
 }
 
 
+// Add a background for the header, with a small black shadow.
 function add_header_background() {
     var graphics = game.add.graphics();
     graphics.beginFill(0x000000, 0.8);
@@ -930,6 +935,7 @@ function add_header_background() {
 }
 
 
+// Add current score to the top-right, with nice letters.
 function add_score() {
     var score =  game.add.bitmapText(game.world.width - 100, 30, 'inversionz',
                                      '' + game.global.score, 60);
@@ -1033,12 +1039,13 @@ function show_earnings(points) {
 }
 
 
+// Change the animation that dino is doing.
 function change_dino(dino, pose) {
     dino.loadTexture(pose);
     dino.y = game.world.height - dino.height;
     var frames = [0, 1, 2, 3, 4, 5, 6, 7, 6, 5, 4, 3, 2, 1];
     dino.animations.add('play', frames);
-    dino.animations.play('play', 10, true);
+    dino.animations.play('play', 10, true);  // 10 fps, loop=true
 }
 
 
@@ -1087,6 +1094,7 @@ function rand(n) {
 }
 
 
+// Add a button at the bottom of the screen that flips the debug mode.
 function add_debug_button() {
     add_button(0xff0000, game.world.height - 100, 'DEBUG',
                () => { game.global.debug = !game.global.debug;
