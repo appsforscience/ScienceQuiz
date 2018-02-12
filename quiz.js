@@ -782,7 +782,7 @@ var state_final = {
         var brag = 'He completado ¿Sabes de Ciencia? y conseguido ' +
             gg.score + ' puntos!'.replace(/ /g, '%20');
         var tweet = 'https://twitter.com/intent/tweet?text=' + brag;
-        var score = 'https://metamagical.org/sdc/puntuaciones/add?name=' +
+        var score = 'https://appsforscience.org/sdc/puntuaciones/add?name=' +
             encodeURIComponent(gg.name) + '&score=' + gg.score;
         var y = 300;
         add_button(gg.color.default, y, 'Subir puntuación a la web',
