@@ -190,7 +190,7 @@ var state_intro = {
         var gg = game.global;  // shortcut
         game.stage.backgroundColor = gg.color.background;
         var name = prompt('¡Hola!\n\n¿Cómo te llamas?\n', get_default_name());
-        gg.name = name ? name.slice(0, 16) : 'persona anónima';
+        gg.name = name ? name.slice(0, 20) : 'persona anónima';
         game.state.start('menu');
     }
 };
@@ -199,7 +199,7 @@ var state_intro = {
 function get_default_name() {
     return game.rnd.pick([
         'RATS', 'Ada', 'Elaine Marley', 'Vera',
-        'Leela', 'Bender', 'Zoidberg',
+        'Leela', 'Bender', 'Dora la exploradora',
         'Leia', 'BB-8', 'K-2SO',
         'Wendy Freedman']);
 }
@@ -259,10 +259,11 @@ var state_menu = {
 
 function get_tutorial_texts() {
     return [
-        ('Para jugar, ve eligiendo categorías. ' +
+        ('Para jugar, ve eligiendo categorías. En cada categoría saldrán 5 ' +
+         'preguntas elegidas al azar. ' +
          'Después de responder una pregunta aparecen dos nuevos botones:\n' +
-         '  "?" saber más\n' +
-         '  ">" continuar\n' +
+         '  "?": saber más\n' +
+         '  ">": continuar\n' +
          'En la pantalla de "saber más" toca en cualquier sitio para seguir.'),
         ('Cuanto más rápido respondas la pregunta, más puntos conseguirás. ' +
          'Superarás el reto si aciertas al menos 3 preguntas.\n' +
