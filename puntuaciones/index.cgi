@@ -66,7 +66,7 @@ head = """<!doctype html>
 
   <h1>¡Puntuaciones Máximas!</h1>
 
-  <h2>¿Sabes de Ciencia?</h2>
+  <h2><a href="/sdc/index.html">¿Sabes de Ciencia?</a></h2>
 """
 
 

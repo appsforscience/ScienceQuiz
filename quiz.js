@@ -696,14 +696,16 @@ var state_prizes = {
                 return [3 * game.world.centerX / 2, y];
         }
 
-        var [x, y] = [game.world.centerX / 2, 200];
+        var [x, y] = [game.world.centerX / 2, 150];
         for (var category in game.global.questions) {
             var prize = add_prize(x, y, category, result_goodness(category));
             [x, y] = next(x, y);
         }
 
-        add_button(game.global.color.default, y + 50, 'Volver al menú',
+        add_button(game.global.color.default, y, 'Volver al menú',
                    () => { game.state.start('menu'); });
+        add_button(game.global.color.default, y + 120, 'Ver puntuaciones máximas',
+                   () => window.open('puntuaciones', '_blank'), 50);
     }
 };
 
@@ -784,8 +786,9 @@ var state_final = {
         add_dino('superhappy');
         var talk = add_dino_talk('¡¡¡Enhorabuena ' + gg.name + '!!!');
 
-        var brag = 'He completado ¿Sabes de Ciencia? y conseguido ' +
-            gg.score + ' puntos!'.replace(/ /g, '%20');
+        var brag = ('He completado ¿Sabes de Ciencia? ' +
+                    '(https://appsforscience.org/sdc/) y conseguido ' +
+                    gg.score + ' puntos!').replace(/ /g, '%20');
         var tweet = 'https://twitter.com/intent/tweet?text=' + brag;
 
         function upload_score() {
