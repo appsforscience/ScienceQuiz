@@ -72,7 +72,7 @@ var state_load = {
         gl.script('webfont',
                   '//ajax.googleapis.com/ajax/libs/webfont/1.4.7/webfont.js');
 
-        read_file('contents.tsv', parse_questions);
+        call_on_url('contents.tsv', parse_questions);
     },
     create: function() {
         this.msg_loading.destroy();
@@ -102,7 +102,7 @@ function flash_image(name, ms) {
 
 // Read asynchronously the contents of local file fname and pass them
 // to a callback if successful.
-function read_file(fname, callback) {
+function call_on_url(fname, callback) {
     var request = new XMLHttpRequest();
     request.open('GET', fname, true);
     request.onload = (e) => {
@@ -115,7 +115,7 @@ function read_file(fname, callback) {
         }
     };
     request.onerror = (e) => game.debug.text(request.statusText);
-    request.send(null);
+    request.send();
 }
 
 
@@ -782,16 +782,23 @@ var state_final = {
         }
 
         add_dino('superhappy');
-        add_dino_talk('¡¡¡Enhorabuena ' + gg.name + '!!!');
+        var talk = add_dino_talk('¡¡¡Enhorabuena ' + gg.name + '!!!');
 
         var brag = 'He completado ¿Sabes de Ciencia? y conseguido ' +
             gg.score + ' puntos!'.replace(/ /g, '%20');
         var tweet = 'https://twitter.com/intent/tweet?text=' + brag;
-        var score = 'https://appsforscience.org/sdc/puntuaciones/add?name=' +
-            encodeURIComponent(gg.name) + '&score=' + gg.score;
+
+        function upload_score() {
+            talk.destroy();
+            add_dino_talk('Subiendo puntuación...');
+            var params = ('?name=' + encodeURIComponent(gg.name) +
+                          '&score=' + gg.score);
+            call_on_url('puntuaciones/add' + params,
+                        (text) => window.open('puntuaciones', '_self'));
+        }
         var y = 300;
         add_button(gg.color.default, y, 'Subir puntuación a la web',
-                   () => window.open(score, '_blank'));
+                   upload_score);
         add_button(gg.color.default, y + 175, 'Compartir en twitter',
                    () => window.open(tweet, '_blank'));
         add_button(gg.color.default, y + 2 * 175, 'Volver a jugar',
