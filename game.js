@@ -1,4 +1,4 @@
-// ¿Sabes de Ciencia?, the quiz game!
+// Ciencialas, the quiz game!
 
 var game = new Phaser.Game(720, 1280, Phaser.AUTO, 'game');
 
@@ -36,11 +36,13 @@ function global_reset() {
     game.global.results = {};
 }
 
+game.state.add('boot', state_boot);
 game.state.add('load', state_load);
 game.state.add('intro', state_intro);
 game.state.add('menu', state_menu);
 game.state.add('play', state_play);
 game.state.add('prizes', state_prizes);
 game.state.add('final', state_final);
+game.state.add('credits', state_credits);
 
-game.state.start('load');
+game.state.start('boot');

@@ -1,7 +1,26 @@
 // The different scenes ("states") of the game.
 
-// TODO: Load the assets and question images in a more asynchronous way
-//       so as to minimally interrupt the player.
+
+//  ************************************************************************
+//  *                                                                      *
+//  *                                Boot                                  *
+//  *                                                                      *
+//  ************************************************************************
+
+var state_boot = {
+    preload: function() {
+        game.load.image('logo', 'assets/logo.png');
+    },
+    create: function() {
+        game.scale.windowConstraints.bottom = 'visual';
+        // See http://www.html5gamedevs.com/topic/11007-question-about-scale-mode-show_all-in-22/
+        game.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
+
+        game.scale.pageAlignHorizontally = true;
+        game.scale.pageAlignVeritcally = true;
+        game.state.start('load');
+    },
+};
 
 
 //  ************************************************************************
@@ -11,15 +30,16 @@
 //  ************************************************************************
 
 var state_load = {
-    msg_loading: {},
     preload: function() {
-        this.msg_loading = game.add.text(50, 50, 'Cargando (prepárate)...',
-                                         {font: '20px Arial', fill: '#ff0044'});
-
         var gl = game.load;  // shortcut
 
+        var splash = game.add.sprite(game.world.centerX, game.world.centerY, 'logo');
+        splash.anchor.set(0.5);
+
+        game.load.setPreloadSprite(splash);
+
         var images = [
-            'logo.png', 'prizes.png', 'missing.png',
+            'prizes.png', 'missing.png',
             'speaker_on.png', 'speaker_off.png',
             'cat_phys.jpg', 'cat_chem.jpg', 'cat_math.jpg',
             'cat_bio.jpg', 'cat_med.jpg', 'cat_tech.jpg',
@@ -56,8 +76,9 @@ var state_load = {
         gl.audio('yes', 'assets/p-ping.mp3');
         gl.audio('nope', 'assets/explosion.mp3');
         gl.audio('blaster', 'assets/blaster.mp3');
-        gl.audio('menu', 'assets/menu_select.mp3');
+        gl.audio('menu', 'assets/need_cells.mp3');
         gl.audio('disabled', 'assets/steps2.mp3');
+        // TODO: add more sounds
 
         gl.bitmapFont('inversionz', 'assets/inversionz.png',
                       'assets/inversionz.xml');
@@ -75,30 +96,9 @@ var state_load = {
         call_on_url('contents.tsv', parse_questions);
     },
     create: function() {
-        this.msg_loading.destroy();
-
-        game.scale.windowConstraints.bottom = 'visual';
-        // See http://www.html5gamedevs.com/topic/11007-question-about-scale-mode-show_all-in-22/
-        game.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
-
-        game.scale.pageAlignHorizontally = true;
-        game.scale.pageAlignVeritcally = true;
-
-        flash_image('logo', 1000);
         game.time.events.add(2000, () => game.state.start('intro'));
     },
 };
-
-
-// Fade in and out an image for the given amount of milliseconds.
-function flash_image(name, ms) {
-    var img = game.add.sprite(game.world.centerX, game.world.centerY, name);
-    img.anchor.set(0.5);
-    img.scale.set(1.5);
-    img.alpha = 0;
-    game.add.tween(img).to({alpha: 1}, ms, null, true, 0, 0, true);
-}
-
 
 // Read asynchronously the contents of local file fname and pass them
 // to a callback if successful.
@@ -225,6 +225,7 @@ var state_menu = {
             add_remove_texts_layer();
             add_menu_header();
             add_category_buttons();
+            add_info_button();
             if (!game.global.release)
                 add_debug_button();
             this.tutorial_texts = get_tutorial_texts();
@@ -786,7 +787,7 @@ var state_final = {
         add_dino('superhappy');
         var talk = add_dino_talk('¡¡¡Enhorabuena ' + gg.name + '!!!');
 
-        var brag = ('He completado ¿Sabes de Ciencia? ' +
+        var brag = ('He completado Ciencialas ' +
                     '(https://appsforscience.org/sdc/) y conseguido ' +
                     gg.score + ' puntos!').replace(/ /g, '%20');
         var tweet = 'https://twitter.com/intent/tweet?text=' + brag;
@@ -874,6 +875,39 @@ function recap(category, question_index) {
     teach(question['comments'][0], question['image'],
           () => recap(category, question_index + 1));
 }
+
+
+//  ************************************************************************
+//  *                                                                      *
+//  *                               Credits                                *
+//  *                                                                      *
+//  ************************************************************************
+
+var state_credits = {
+    create: function() {
+        var gg = game.global;  // shortcut
+        game.stage.backgroundColor = gg.color.background;
+
+        add_menu_header();
+
+        function add_text(y, txt) {
+            var text = add_label(game.world.centerX, y, txt);
+            text.align = 'center';
+            text.anchor.set(0.5);
+        }
+
+        add_dino('superhappy');
+        var talk = add_dino_talk(
+            'CIENCIALAS\n' +
+             '\n' +
+             'Un rato para conocer a tus científicas favoritas traído por\n' +
+             '\n' +
+             'Sara Gil Casanova\n' +
+             'Fernando Liébana\n' +
+             'Jordi Burguet Castell',
+            () => { global_reset(); game.state.start('menu'); });
+    },
+};
 
 
 //  ************************************************************************
@@ -995,6 +1029,42 @@ function add_label(x, y, txt) {
 }
 
 
+function add_button_simple(color, x, y, text, on_click) {
+    var group_button = game.add.group();
+
+    var button_text = add_label(0, y, text);
+
+    var w = button_text.width + 40;
+    var h = button_text.height + 40;
+    function paint(rect, shift, color) {
+        rect.beginFill(color, 1);
+        rect.drawRoundedRect(shift - w / 2, y - 20 + shift, w, h, 5);
+        rect.endFill();
+        return rect;
+    }
+
+    var button_bg = game.add.graphics(0, 0);
+    paint(button_bg, 5, 0x333333);
+    var button_fg = game.add.graphics(0, 0);
+    paint(button_fg, 0, color);
+    group_button.addMultiple([button_bg, button_fg, button_text]);
+
+    var c = Phaser.Color.getRGB(color);
+    var over = Phaser.Color.getColor(c.red * 0.9, c.green * 0.9, c.blue * 0.9);
+    var click = Phaser.Color.getColor(c.red * 0.8, c.green * 0.8, c.blue * 0.8);
+    button_fg.inputEnabled = true;
+    button_fg.input.useHandCursor = true;
+    button_fg.events.onInputOver.add(() => paint(button_fg, 0, over));
+    button_fg.events.onInputOut.add(() => paint(button_fg, 0, color));
+    button_fg.events.onInputDown.add(() => paint(button_fg, 0, click));
+    button_fg.events.onInputUp.add(on_click);
+
+    group_button.x = x;
+
+    return group_button;
+}
+
+
 // Add button with text on it, centered, at the given y, with a
 // callback when clicked.
 function add_button(color, y, text, on_click, delay_animation) {
@@ -1109,4 +1179,12 @@ function add_debug_button() {
     add_button(0xff0000, game.world.height - 100, 'DEBUG',
                () => { game.global.debug = !game.global.debug;
                        add_menu_background(); });
+}
+
+
+// Add a info button
+function add_info_button() {
+    add_button_simple(game.global.color.header,
+               game.world.width - 40, game.world.height - 75, 'i',
+               () => { game.state.start('credits'); });
 }
