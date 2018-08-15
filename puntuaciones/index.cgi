@@ -47,26 +47,26 @@ head = """<!doctype html>
   <link rel="icon" type="image/png" href="../assets/favicon.png" />
   <meta charset="utf-8" />
   <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no, shrink-to-fit=no" />
-  <meta name="description" content="¿Sabes de Ciencia? Una app de divulgación científica realizada por Jordi Burguet, Fernando Liébana y Sara Gil. ¡Apps for Science!" />
+  <meta name="description" content="Ciencialas. Una app de divulgación científica realizada por Jordi Burguet, Fernando Liébana y Sara Gil. ¡Apps for Science!" />
   <meta name="keywords" content="ciencia,quiz,app" />
   <meta name="author" content="Sara Gil Casanova, Fernando Liebana Bernardez y Jordi Burguet Castell" />
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:site" content="@appsforscience_" />
   <meta name="twitter:creator" content="@sagilca" />
-  <meta name="twitter:title" content="¿Sabes de Ciencia?" />
-  <meta name="twitter:description" content="¿Sabes de Ciencia? Una app de divulgación científica." />
+  <meta name="twitter:title" content="Ciencialas" />
+  <meta name="twitter:description" content="Ciencialas. Una app de divulgación científica." />
   <meta name="twitter:image" content="http://appsforscience.org/sdc/assets/banner.png" />
   <meta property="og:image" content="http://appsforscience.org/sdc/assets/banner.png" />
   <meta property="og:image:width" content="512" />
   <meta property="og:image:height" content="250" />
-  <meta property="og:title" content="¿Sabes de Ciencia?"/ />
-  <meta property="og:description" content="¿Sabes de Ciencia? Una app de divulgación científica realizada por Jordi Burguet, Fernando Liébana y Sara Gil. ¡Apps for Science!" />
+  <meta property="og:title" content="Ciencialas"/ />
+  <meta property="og:description" content="Ciencialas. Una app de divulgación científica realizada por Jordi Burguet, Fernando Liébana y Sara Gil. ¡Apps for Science!" />
 </head>
 <body>
 
   <h1>¡Puntuaciones Máximas!</h1>
 
-  <h2><a href="/sdc/index.html">¿Sabes de Ciencia?</a></h2>
+  <h2><a href="/sdc/index.html">Ciencialas</a></h2>
 """
 
 

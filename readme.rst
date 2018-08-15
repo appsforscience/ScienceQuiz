@@ -1,7 +1,7 @@
-¿Sabes de Ciencia?
-==================
+Ciencialas
+==========
 
-¿Sabes de Ciencia? es un juego de preguntas sobre temas
+Ciencialas es un juego de preguntas sobre temas
 científicos. Está hecho en html5 usando `phaser`_.
 
 .. _`phaser`: https://phaser.io
