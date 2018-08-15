@@ -42,7 +42,7 @@ def get_results():
 head = """<!doctype html>
 <html>
 <head>
-  <title>Resultados de ¿Sabes De Ciencia?</title>
+  <title>Resultados de Ciencialas</title>
 <link rel="stylesheet" href="../main.css" />
   <link rel="icon" type="image/png" href="../assets/favicon.png" />
   <meta charset="utf-8" />
