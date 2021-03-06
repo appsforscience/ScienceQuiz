@@ -29,6 +29,8 @@ var state_boot = {
 //  *                                                                      *
 //  ************************************************************************
 
+var music = undefined;
+
 var state_load = {
     preload: function() {
         var gl = game.load;  // shortcut
@@ -36,7 +38,7 @@ var state_load = {
         var splash = game.add.sprite(game.world.centerX, game.world.centerY, 'logo');
         splash.anchor.set(0.5);
 
-        game.load.setPreloadSprite(splash);
+        gl.setPreloadSprite(splash);
 
         var images = [
             'prizes.png', 'missing.png',
@@ -70,7 +72,7 @@ var state_load = {
         for (var i = 0; i < dino_poses.length; i++) {
             var [img, w, h] = dino_poses[i];
             var path = 'assets/Animation_' + img + '.png';
-            game.load.spritesheet(img, path, w / 8, h);
+            gl.spritesheet(img, path, w / 8, h);
         }
 
         gl.audio('yes', 'assets/p-ping.mp3');
@@ -79,6 +81,7 @@ var state_load = {
         gl.audio('menu', 'assets/need_cells.mp3');
         gl.audio('disabled', 'assets/steps2.mp3');
         // TODO: add more sounds
+        gl.audio('music', 'assets/music.mp3');
 
         gl.bitmapFont('inversionz', 'assets/inversionz.png',
                       'assets/inversionz.xml');
@@ -96,6 +99,9 @@ var state_load = {
         call_on_url('contents.tsv', parse_questions);
     },
     create: function() {
+        music = game.add.audio('music');
+        music.onDecoded.add(() => music.play('', 0, 0.06, true), this);
+
         game.time.events.add(2000, () => game.state.start('intro'));
     },
 };
@@ -1000,6 +1006,11 @@ function add_sound_button() {
     function switch_audio() {
         game.sound.noAudio = !game.sound.noAudio;
         img.loadTexture('speaker_' + (game.sound.noAudio ? 'off' : 'on'));
+
+        if (game.sound.noAudio)
+            music.fadeOut(2000);
+        else
+            music.play('', 0, 0.06, true);
     }
 
     img.inputEnabled = true;
