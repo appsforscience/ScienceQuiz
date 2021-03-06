@@ -64,9 +64,9 @@ head = """<!doctype html>
 </head>
 <body>
 
-  <h1>¡Puntuaciones Máximas!</h1>
+  <h1>Puntuaciones Máximas de <a href="/sdc/index.html">Ciencialas</a></h1>
 
-  <h2><a href="/sdc/index.html">Ciencialas</a></h2>
+  <p> </p>
 """
 
 
