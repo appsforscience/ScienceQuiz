@@ -1008,7 +1008,7 @@ function add_sound_button() {
         img.loadTexture('speaker_' + (game.sound.noAudio ? 'off' : 'on'));
 
         if (game.sound.noAudio)
-            music.fadeOut(2000);
+            music.fadeOut();
         else
             music.play('', 0, 0.06, true);
     }
